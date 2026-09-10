@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NotGPT — Not everything needs AI</title>
+<title>NotGPT - Not everything needs AI</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="css/style.css">
 
@@ -46,9 +46,9 @@
       <i class="fa-solid fa-gear"></i>
       Settings
     </div>
-    <div class="sidebar-footer-btn" onclick="window.open('https://buymeacoffee.com','_blank')">
+    <div class="sidebar-footer-btn" onclick="window.open('https://ko-fi.com/notgpt','_blank')">
       <i class="fa-solid fa-mug-hot"></i>
-      Buy me a coffee
+      Support on Ko-fi
     </div>
   </div>
 </aside>
@@ -117,7 +117,7 @@
   <div class="modal" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeModalDirect()">&times;</button>
     <h2>What can I do?</h2>
-    <p class="modal-sub">NotGPT uses math, not AI. All of this — without a single drop of AI.</p>
+    <p class="modal-sub">NotGPT uses math, not AI. All of this - without a single drop of AI.</p>
     <div class="modal-category"><h3><i class="fa-solid fa-calculator"></i> Calculators</h3><div class="modal-category-items"><span class="modal-tag">Percentage</span><span class="modal-tag">Arithmetic</span><span class="modal-tag">Tip</span><span class="modal-tag">Discount</span><span class="modal-tag">Tax</span><span class="modal-tag">Compound interest</span><span class="modal-tag">EMI</span><span class="modal-tag">Average</span><span class="modal-tag">Random numbers</span></div></div>
     <div class="modal-category"><h3><i class="fa-solid fa-calendar-days"></i> Date & Time</h3><div class="modal-category-items"><span class="modal-tag">Age calculator</span><span class="modal-tag">Date difference</span><span class="modal-tag">Add/subtract days</span><span class="modal-tag">Day of the week</span><span class="modal-tag">Timezone conversion</span><span class="modal-tag">Countdown</span></div></div>
     <div class="modal-category"><h3><i class="fa-solid fa-arrows-rotate"></i> Unit Conversion</h3><div class="modal-category-items"><span class="modal-tag">Length</span><span class="modal-tag">Weight</span><span class="modal-tag">Temperature</span><span class="modal-tag">Area</span><span class="modal-tag">Volume</span><span class="modal-tag">Speed</span><span class="modal-tag">Data/storage</span></div></div>
@@ -154,8 +154,9 @@
     <div class="settings-group">
       <div class="settings-label">Share feedback</div>
       <p class="settings-desc">Found a bug? Have an idea? We'd love to hear from you.</p>
-      <button class="settings-btn" onclick="window.open('mailto:feedback@notgpt.com?subject=NotGPT Feedback','_blank')">
-        <i class="fa-solid fa-envelope"></i> Send feedback
+      <textarea id="feedbackInput" placeholder="Type your feedback here..." style="width:100%;min-height:60px;background:var(--bg-primary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-family:var(--font);font-size:13px;padding:10px;resize:vertical;outline:none;margin-bottom:8px;"></textarea>
+      <button class="settings-btn" onclick="var fb=document.getElementById('feedbackInput');sendFeedback(fb.value);fb.value='';">
+        <i class="fa-solid fa-paper-plane"></i> Send feedback
       </button>
     </div>
 

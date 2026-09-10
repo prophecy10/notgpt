@@ -1,6 +1,6 @@
 // ---- WORD COUNT + CASE CONVERT ----
 // ============================================================================
-// NotGPT Text Tools — tools-text.js
+// NotGPT Text Tools - tools-text.js
 // Two deterministic utilities: Word Counter & Case Converter
 // ============================================================================
 
@@ -40,7 +40,7 @@ function tryWordCount(lower, original) {
     /word\s*count\s+(?:of|for)\s+(.+)/,
     // "count words in …" / "count the words in …" / "count words of …"
     /count\s+(?:the\s+)?words\s+(?:in|of)\s+(.+)/,
-    // "make this uppercase: text" style — but for counting
+    // "make this uppercase: text" style - but for counting
     // "count this: …" / "count these: …"
     /count\s+(?:this|these)\s*[:\-–—]\s*(.+)/,
   ];
@@ -107,7 +107,7 @@ function tryWordCount(lower, original) {
   const lines = text.split(/\r?\n/);
   const lineCount = lines.length;
 
-  // Sentences — approximate: split on . ! ? (ignoring common abbreviations
+  // Sentences - approximate: split on . ! ? (ignoring common abbreviations
   // like Mr. Mrs. Dr. etc. is hard, so we keep it simple)
   const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
   const sentenceCount = Math.max(sentences.length, wordCount > 0 ? 1 : 0);

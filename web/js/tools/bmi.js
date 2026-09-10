@@ -70,8 +70,8 @@ function tryBMI(lower, original) {
   }
 
   // ---- Fallback: try to infer from two bare numbers + context ----
-  // "bmi 75 kg 180 cm" or "bmi 180 cm 75 kg" — already handled above via kg/cm patterns
-  // "bmi calculator 65kg 165cm" — also handled
+  // "bmi 75 kg 180 cm" or "bmi 180 cm 75 kg" - already handled above via kg/cm patterns
+  // "bmi calculator 65kg 165cm" - also handled
   // If we still don't have both, try to disambiguate bare numbers near unit hints
   if (!heightCm || !weightKg) {
     // Try extracting all numbers from the string

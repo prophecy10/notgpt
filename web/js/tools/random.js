@@ -17,7 +17,7 @@ function tryRandomNumber(lower, original) {
   }
 
   // "random number between X and Y", "random number 1-100", "give me a random number from 1 to 100"
-  let m = lower.match(/random\s*(?:number|num|int|integer)?\s*(?:between|from)?\s*(\d+)\s*(?:and|to|-|–|—)\s*(\d+)/);
+  let m = lower.match(/random\s*(?:number|num|int|integer)?\s*(?:between|from)?\s*(\d+)\s*(?:and|to|-|–| -)\s*(\d+)/);
   if (m) {
     const min = parseInt(m[1]);
     const max = parseInt(m[2]);

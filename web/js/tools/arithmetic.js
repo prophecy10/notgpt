@@ -1,6 +1,6 @@
 // ---- ARITHMETIC + BMI ----
 // =================== TOOL: BASIC ARITHMETIC ===================
-// Safe math evaluator — NO eval(). Tokenizes, respects order of operations,
+// Safe math evaluator - NO eval(). Tokenizes, respects order of operations,
 // handles parentheses, unary minus, and multi-operation expressions.
 
 function tryArithmetic(lower, original) {
@@ -239,7 +239,7 @@ function _buildDisplayExpr(normalised, original) {
   display = display.replace(/([+\-*/%^])/g, ' $1 ');
   // Collapse multiple spaces
   display = display.replace(/\s{2,}/g, ' ').trim();
-  // Don't show leading unary as "  - 5"
+  // Don't show leading unary as " - 5"
   display = display.replace(/^\s*-\s+/, '-');
   return display;
 }
@@ -249,7 +249,7 @@ function formatNum(n) {
   if (Number.isInteger(n) && Math.abs(n) < 1e15) {
     return n.toLocaleString();
   }
-  // Floating point — limit fraction digits
+  // Floating point - limit fraction digits
   const str = n.toFixed(10).replace(/\.?0+$/, '');
   const val = parseFloat(str);
   if (Math.abs(val) >= 1e15 || (Math.abs(val) < 1e-6 && val !== 0)) {

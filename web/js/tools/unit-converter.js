@@ -1,10 +1,10 @@
 // ---- UNIT CONVERSION ----
 // ============================================================================
-// NotGPT — Expanded Unit Conversion Engine
+// NotGPT - Expanded Unit Conversion Engine
 // ============================================================================
 // Drop-in replacement for tryUnitConversion(lower, original).
 // Covers: length, weight, temperature, data/storage, speed, area, volume,
-//         cooking, time — with broad alias and NLP pattern support.
+//         cooking, time - with broad alias and NLP pattern support.
 //
 // Returns { type: 'conversion', html: '...' } or null.
 // Relies on the global escapeHtml(text) helper already in the app.
@@ -76,7 +76,7 @@ function tryUnitConversionExpanded(lower, original) {
   const toKey = canonicalUnit(rawTo);
 
   if (!fromKey || !toKey) {
-    // One of the units wasn't recognised — fall through to legacy compound
+    // One of the units wasn't recognised - fall through to legacy compound
     return tryFeetInchesCompound(lower);
   }
 
@@ -97,7 +97,7 @@ function tryUnitConversionExpanded(lower, original) {
   };
 
   // ======================================================================
-  //  UNIT ALIAS MAP — maps any user string to a canonical key
+  //  UNIT ALIAS MAP - maps any user string to a canonical key
   // ======================================================================
   function canonicalUnit(raw) {
     const u = raw.toLowerCase()
@@ -174,7 +174,7 @@ function tryUnitConversionExpanded(lower, original) {
   }
 
   // ======================================================================
-  //  DISPLAY NAMES — pretty unit labels for output
+  //  DISPLAY NAMES - pretty unit labels for output
   // ======================================================================
   function displayUnit(key) {
     const names = {
@@ -212,12 +212,12 @@ function tryUnitConversionExpanded(lower, original) {
   // ======================================================================
   function convert(val, from, to) {
     if (from === to) {
-      return { value: val, formula: 'Same unit — no conversion needed', emoji: emojiFor(from) };
+      return { value: val, formula: 'Same unit - no conversion needed', emoji: emojiFor(from) };
     }
 
     const emoji = emojiFor(from);
 
-    // ── Temperature (special — not ratio-based) ────────────────────────
+    // ── Temperature (special - not ratio-based) ────────────────────────
     if ((from === 20 && to === 21) || (from === 21 && to === 20)) {
       if (from === 20) {
         const r = (val * 9 / 5) + 32;
@@ -276,7 +276,7 @@ function tryUnitConversionExpanded(lower, original) {
       return { value: r, formula: `1 ${displayUnit(from)} = ${fmt(ratio)} ${displayUnit(to)}`, emoji };
     }
 
-    // ── Cooking (all via ml) — merge with volume ────────────────────────
+    // ── Cooking (all via ml) - merge with volume ────────────────────────
     const cookToML = { 70: 236.588, 71: 14.7868, 72: 4.92892 };
     // Cooking ↔ Cooking
     if (cookToML[from] !== undefined && cookToML[to] !== undefined) {

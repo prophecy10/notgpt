@@ -6,6 +6,9 @@ const STORAGE_KEY = 'notgpt_chats';
 const MAX_CHATS = 25;
 const WATER_PER_QUERY_ML = 10;
 
+// Google Sheets endpoint for opt-in data collection
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyuyiKgpBL9RPH81m9E4KLpmHVcn3yOXaJvg-hG3yyZF-bU2I8M_gXcj97RpLjBR0zGsA/exec';
+
 let allChats = [];
 let activeChatId = null;
 let sessionWaterMl = 0;
@@ -92,6 +95,8 @@ function createNewChat(silent) {
   document.getElementById('composerInput').value = '';
   toggleSend();
   setWelcomeMessage();
+  document.getElementById('sessionWater').classList.remove('visible');
+  sessionWaterMl = 0;
   if (!silent) document.getElementById('composerInput').focus();
 }
 
@@ -113,6 +118,8 @@ function loadChat(chatId) {
     document.getElementById('welcomeScreen').style.display = '';
     container.style.display = 'none';
     setWelcomeMessage();
+    document.getElementById('sessionWater').classList.remove('visible');
+    sessionWaterMl = 0;
   } else {
     document.getElementById('welcomeScreen').style.display = 'none';
     container.style.display = 'block';
@@ -131,6 +138,7 @@ function loadChat(chatId) {
       }
     });
     scrollToBottom();
+    updateWaterBadge();
   }
 }
 
@@ -196,30 +204,17 @@ function addBotMessageDOM(html, ts) {
   const container = document.getElementById('messagesContainer');
   const div = document.createElement('div');
   div.className = 'message msg-bot';
-  const copyId = 'copy-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+  div.setAttribute('data-chars', html.length.toString());
   div.innerHTML = `
     <div class="msg-content">${html}</div>
     <div class="msg-meta">
       <div class="msg-time">${formatTime(ts)}</div>
-      <div class="water-badge"><i class="fa-solid fa-droplet"></i> ~${WATER_PER_QUERY_ML}ml saved · No AI used</div>
-      <button class="copy-result-btn" id="${copyId}" onclick="copyBotMessage(this)" title="Copy to clipboard" style="
-        background: none;
-        border: 1px solid var(--border);
-        color: var(--text-muted);
-        cursor: pointer;
-        font-size: 11px;
-        padding: 3px 8px;
-        border-radius: 6px;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        transition: all 0.15s;
-        position: relative;
-      " onmouseenter="this.style.color='var(--text-primary)';this.style.borderColor='var(--border-hover)'" onmouseleave="this.style.color='var(--text-muted)';this.style.borderColor='var(--border)'">
-        <i class="fa-regular fa-clipboard"></i>
+      <button class="copy-btn" onclick="copyBotMessage(this)" title="Copy">
+        <i class="fa-regular fa-clone"></i>
       </button>
     </div>`;
   container.appendChild(div);
+  updateWaterBadge();
 }
 
 // =================== COPY BUTTON ===================
@@ -331,7 +326,8 @@ function sendMessage(text) {
 
     if (result && result.type === 'help') {
       openModal();
-      const helpHtml = "I've opened the full tool catalog for you! Take a look at everything I can do — all without AI. 💧";
+      const helpHtml = "I've opened the full tool catalog for you! Take a look at everything I can do - all without AI. 💧";
+      logQuery(text, 'help', true);
       chat.messages.push({ type: 'bot', html: helpHtml, timestamp: respTime });
       addBotMessageDOM(helpHtml, respTime);
       addWaterSaved();
@@ -341,6 +337,7 @@ function sendMessage(text) {
     }
 
     if (result && result.html) {
+      logQuery(text, result.type, true);
       chat.messages.push({ type: 'bot', html: result.html, timestamp: respTime });
       addBotMessageDOM(result.html, respTime);
       addWaterSaved();
@@ -352,6 +349,7 @@ function sendMessage(text) {
     // Fallback
     const fallback = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
     const responseHtml = fallback;
+    logQuery(text, 'unmatched', false);
     chat.messages.push({ type: 'bot', html: responseHtml, timestamp: respTime });
     addBotMessageDOM(responseHtml, respTime);
     addWaterSaved();
@@ -376,9 +374,36 @@ function toggleSend() { document.getElementById('sendBtn').disabled = !document.
 
 // =================== WATER ===================
 function addWaterSaved() {
-  sessionWaterMl += WATER_PER_QUERY_ML;
-  document.getElementById('sessionWater').classList.add('visible');
-  document.getElementById('sessionWaterAmount').textContent = '~' + sessionWaterMl + ' ml saved';
+  /* handled by updateWaterBadge */
+}
+
+function calcWaterSaved(charCount) {
+  return Math.max(5, Math.round(5 + (charCount / 100) * 2));
+}
+
+function updateWaterBadge() {
+  var container = document.getElementById('messagesContainer');
+  var el = document.getElementById('sessionWater');
+
+  var botMsgs = container.querySelectorAll('.msg-bot');
+
+  if (botMsgs.length === 0) {
+    el.classList.remove('visible');
+    sessionWaterMl = 0;
+    return;
+  }
+
+  var totalWater = 0;
+  botMsgs.forEach(function(msg) {
+    var chars = parseInt(msg.getAttribute('data-chars') || '200');
+    totalWater += calcWaterSaved(chars);
+  });
+
+  var responseCount = botMsgs.length;
+  sessionWaterMl = totalWater;
+  el.classList.add('visible');
+  document.getElementById('sessionWaterAmount').textContent = '~' + totalWater + ' ml saved';
+  el.title = '~' + totalWater + ' ml saved with ' + responseCount + ' response' + (responseCount > 1 ? 's' : '');
 }
 
 // =================== WELCOME ===================
@@ -433,6 +458,38 @@ function openSettings() {
 function closeSettings(e) { if (e.target === document.getElementById('settingsOverlay')) closeSettingsDirect(); }
 function closeSettingsDirect() { document.getElementById('settingsOverlay').classList.remove('active'); }
 function updateChatLimitLabel(val) { document.getElementById('chatLimitVal').textContent = val; }
+
+// =================== DATA LOGGING (opt-in) ===================
+function logQuery(query, toolMatched, matched) {
+  try {
+    var settings = loadSettings();
+    if (!settings.shareChats) return;
+    fetch(SHEETS_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        type: 'query',
+        query: query,
+        tool: toolMatched || 'fallback',
+        matched: matched ? 'yes' : 'no'
+      })
+    }).catch(function() {});
+  } catch(e) {}
+}
+
+function sendFeedback(message) {
+  if (!message || !message.trim()) return;
+  fetch(SHEETS_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      type: 'feedback',
+      message: message.trim()
+    })
+  }).then(function() {
+    alert('Thank you for your feedback! 🙏');
+  }).catch(function() {
+    alert('Could not send feedback. Please try again.');
+  });
+}
 
 // =================== BOOT ===================
 init();
