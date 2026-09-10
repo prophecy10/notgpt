@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NotGPT — Not everything needs AI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+
+<!-- MOBILE MENU BUTTON -->
+<button class="mobile-menu-btn" onclick="toggleSidebar()">
+  <i class="fa-solid fa-bars"></i>
+</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <svg class="sidebar-logo-icon" viewBox="0 0 80 80" fill="none">
+      <path d="M22 14C16 14 12 18 12 24V34C12 38 8 40 8 40C8 40 12 42 12 46V56C12 62 16 66 22 66" stroke="#4fc3f7" stroke-width="5" stroke-linecap="round"/>
+      <path d="M58 14C64 14 68 18 68 24V34C68 38 72 40 72 40C72 40 68 42 68 46V56C68 62 64 66 58 66" stroke="#4fc3f7" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="33" cy="35" r="3.5" fill="#e8e8e8"/>
+      <circle cx="47" cy="35" r="3.5" fill="#e8e8e8"/>
+      <path d="M33 48C33 48 36 52 40 52C44 52 47 48 47 48" stroke="#e8e8e8" stroke-width="3" stroke-linecap="round" fill="none"/>
+    </svg>
+    <span class="sidebar-logo-text">NotGPT</span>
+  </div>
+
+  <button class="new-chat-btn" onclick="createNewChat()">
+    <i class="fa-solid fa-plus"></i>
+    New chat
+  </button>
+
+  <div class="sidebar-section-label" id="chatListLabel">Today</div>
+  <div class="chat-list" id="chatList"></div>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-footer-btn" onclick="openModal()">
+      <i class="fa-solid fa-compass"></i>
+      What can I do?
+    </div>
+    <div class="sidebar-footer-btn" onclick="openSettings()">
+      <i class="fa-solid fa-gear"></i>
+      Settings
+    </div>
+    <div class="sidebar-footer-btn" onclick="window.open('https://buymeacoffee.com','_blank')">
+      <i class="fa-solid fa-mug-hot"></i>
+      Buy me a coffee
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="header">
+    <span class="header-title"><span class="hb">{</span> NotGPT <span class="hb">}</span></span>
+    <span class="header-badge">NO AI</span>
+  </div>
+
+  <div class="chat-area" id="chatArea">
+    <div class="welcome" id="welcomeScreen">
+      <div class="welcome-icon">
+        <svg viewBox="0 0 80 80" fill="none">
+          <path d="M22 14C16 14 12 18 12 24V34C12 38 8 40 8 40C8 40 12 42 12 46V56C12 62 16 66 22 66" stroke="#4fc3f7" stroke-width="4" stroke-linecap="round"/>
+          <path d="M58 14C64 14 68 18 68 24V34C68 38 72 40 72 40C72 40 68 42 68 46V56C68 62 64 66 58 66" stroke="#4fc3f7" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="33" cy="35" r="3" fill="#e8e8e8"/>
+          <circle cx="47" cy="35" r="3" fill="#e8e8e8"/>
+          <path d="M33 48C33 48 36 52 40 52C44 52 47 48 47 48" stroke="#e8e8e8" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="welcome-title" id="welcomeTitle"></div>
+      <div class="welcome-sub" id="welcomeSub"></div>
+      <div class="suggestion-chips">
+        <div class="chip" onclick="sendMessage('What is 18% of 4500?')">What is 18% of 4500?</div>
+        <div class="chip" onclick="sendMessage('Convert 5 feet 8 inches to cm')">5ft 8in to cm</div>
+        <div class="chip" onclick="sendMessage('Generate a random number between 1 and 100')">Random 1–100</div>
+        <div class="chip" onclick="sendMessage('How many days until December 31 2026?')">Days until New Year</div>
+        <div class="chip" onclick="sendMessage('What can you do?')">What can you do?</div>
+      </div>
+      <div class="welcome-tagline">
+        <i class="fa-solid fa-leaf"></i>
+        Simple tasks. Simple tools. Zero AI. Save water.
+      </div>
+    </div>
+
+    <div class="messages-container" id="messagesContainer"></div>
+  </div>
+
+  <div class="composer-wrapper">
+    <div class="composer">
+      <div class="composer-box">
+        <textarea class="composer-input" id="composerInput"
+          placeholder="Ask me to calculate, convert, generate, or format something..."
+          rows="1" onkeydown="handleKey(event)" oninput="autoGrow(this); toggleSend()"></textarea>
+        <button class="send-btn" id="sendBtn" disabled onclick="sendFromComposer()">
+          <i class="fa-solid fa-arrow-up" style="font-size:13px"></i>
+        </button>
+      </div>
+      <div class="composer-footer">
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SESSION WATER COUNTER -->
+<div class="session-water" id="sessionWater" title="No water saved yet">
+  <i class="fa-solid fa-droplet"></i>
+  <span id="sessionWaterAmount">~0 ml saved</span>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModalDirect()">&times;</button>
+    <h2>What can I do?</h2>
+    <p class="modal-sub">NotGPT uses math, not AI. All of this — without a single drop of AI.</p>
+    <div class="modal-category"><h3><i class="fa-solid fa-calculator"></i> Calculators</h3><div class="modal-category-items"><span class="modal-tag">Percentage</span><span class="modal-tag">Arithmetic</span><span class="modal-tag">Tip</span><span class="modal-tag">Discount</span><span class="modal-tag">Tax</span><span class="modal-tag">Compound interest</span><span class="modal-tag">EMI</span><span class="modal-tag">Average</span><span class="modal-tag">Random numbers</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-calendar-days"></i> Date & Time</h3><div class="modal-category-items"><span class="modal-tag">Age calculator</span><span class="modal-tag">Date difference</span><span class="modal-tag">Add/subtract days</span><span class="modal-tag">Day of the week</span><span class="modal-tag">Timezone conversion</span><span class="modal-tag">Countdown</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-arrows-rotate"></i> Unit Conversion</h3><div class="modal-category-items"><span class="modal-tag">Length</span><span class="modal-tag">Weight</span><span class="modal-tag">Temperature</span><span class="modal-tag">Area</span><span class="modal-tag">Volume</span><span class="modal-tag">Speed</span><span class="modal-tag">Data/storage</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-font"></i> Text Utilities</h3><div class="modal-category-items"><span class="modal-tag">Word count</span><span class="modal-tag">Character count</span><span class="modal-tag">Change case</span><span class="modal-tag">Remove duplicates</span><span class="modal-tag">Sort lines</span><span class="modal-tag">Find & replace</span><span class="modal-tag">Extract emails/URLs</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-code"></i> Developer Tools</h3><div class="modal-category-items"><span class="modal-tag">JSON formatter</span><span class="modal-tag">Base64 encode/decode</span><span class="modal-tag">URL encode/decode</span><span class="modal-tag">UUID generator</span><span class="modal-tag">Hash generation</span><span class="modal-tag">Color conversion</span><span class="modal-tag">Regex tester</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-dice"></i> Generators</h3><div class="modal-category-items"><span class="modal-tag">Password</span><span class="modal-tag">UUID</span><span class="modal-tag">Random number</span><span class="modal-tag">Random choice</span><span class="modal-tag">Lorem ipsum</span><span class="modal-tag">Color palette</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-heart-pulse"></i> Everyday</h3><div class="modal-category-items"><span class="modal-tag">BMI</span><span class="modal-tag">Fuel cost</span><span class="modal-tag">Cooking conversions</span><span class="modal-tag">Recipe scaling</span><span class="modal-tag">Electricity cost</span><span class="modal-tag">Loan/mortgage</span><span class="modal-tag">Shopping discount</span></div></div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsOverlay" onclick="closeSettings(event)">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
+    <button class="modal-close" onclick="closeSettingsDirect()">&times;</button>
+    <h2>Settings</h2>
+    <p class="modal-sub">Your preferences. Stored locally in your browser.</p>
+
+    <!-- Chat history limit -->
+    <div class="settings-group">
+      <div class="settings-label">
+        Chats to keep in sidebar
+        <span class="settings-hint">Everything is stored locally in your browser. Nothing leaves your device.</span>
+      </div>
+      <div class="settings-slider-row">
+        <input type="range" id="chatLimitSlider" class="settings-slider" min="1" max="25" value="25" oninput="updateChatLimitLabel(this.value)">
+        <span class="settings-slider-val" id="chatLimitVal">25</span>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="settings-divider"></div>
+
+    <!-- Share feedback -->
+    <div class="settings-group">
+      <div class="settings-label">Share feedback</div>
+      <p class="settings-desc">Found a bug? Have an idea? We'd love to hear from you.</p>
+      <button class="settings-btn" onclick="window.open('mailto:feedback@notgpt.com?subject=NotGPT Feedback','_blank')">
+        <i class="fa-solid fa-envelope"></i> Send feedback
+      </button>
+    </div>
+
+    <!-- Divider -->
+    <div class="settings-divider"></div>
+
+    <!-- Share chats with dev -->
+    <div class="settings-group">
+      <label class="settings-checkbox-row" for="shareChatsToggle">
+        <input type="checkbox" id="shareChatsToggle" onchange="saveSettings()">
+        <div>
+          <span class="settings-checkbox-label">Share chats with developer</span>
+          <span class="settings-hint">Whatever you type in the chatbox will be shared with the developer to improve the tool. This helps us understand common searches and improve utility coverage. Off by default.</span>
+        </div>
+      </label>
+    </div>
+
+    <!-- Divider -->
+    <div class="settings-divider"></div>
+
+    <!-- Terms -->
+    <div class="settings-group">
+      <div class="settings-label">Terms & Conditions</div>
+      <div class="settings-terms">
+        <p>Haven't really thought of keeping terms and conditions for a simple tool. But <strong>don't do anything illegal</strong> with it. What's illegal in your country stays illegal here. Simple as that.</p>
+        <p style="margin-top:8px; color: var(--text-muted);">Also: NotGPT is <strong>not affiliated with OpenAI or ChatGPT</strong>. "GPT" is a trademark of OpenAI. We just think not everything needs it. 🤷</p>
+      </div>
+    </div>
+
+    <!-- Save button -->
+    <div style="margin-top: 16px; text-align: center;">
+      <button class="settings-save-btn" onclick="saveSettings(); closeSettingsDirect();">
+        Save & close
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Tools -->
+<script src="js/tools/percentage.js"></script>
+<script src="js/tools/date-diff.js"></script>
+<script src="js/tools/unit-converter.js"></script>
+<script src="js/tools/random.js"></script>
+<script src="js/tools/json-formatter.js"></script>
+<script src="js/tools/char-count.js"></script>
+<script src="js/tools/word-count.js"></script>
+<script src="js/tools/case-convert.js"></script>
+<script src="js/tools/arithmetic.js"></script>
+<script src="js/tools/bmi.js"></script>
+
+<!-- Parser (depends on tools being loaded) -->
+<script src="js/parser.js"></script>
+
+<!-- Core app (depends on parser + tools) -->
+<script src="js/app.js"></script>
+
+</body>
+</html>

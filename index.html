@@ -1,0 +1,3012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NotGPT — Not everything needs AI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap');
+
+:root {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #242424;
+  --bg-tertiary: #111;
+  --bg-hover: #2e2e2e;
+  --bg-active: #333;
+  --text-primary: #e8e8e8;
+  --text-secondary: #aaa;
+  --text-muted: #666;
+  --border: rgba(255,255,255,0.07);
+  --border-hover: rgba(255,255,255,0.14);
+  --accent: #4fc3f7;
+  --accent-dark: #0288d1;
+  --radius: 22px;
+  --radius-sm: 12px;
+  --radius-xs: 8px;
+  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  --sidebar-width: 260px;
+  --max-content: 660px;
+  --transition: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  display: flex;
+}
+
+/* =================== SIDEBAR =================== */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--bg-tertiary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px 14px;
+}
+.sidebar-logo-icon { width: 26px; height: 26px; flex-shrink: 0; }
+.sidebar-logo-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.new-chat-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  padding: 9px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: var(--font);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  margin-bottom: 6px;
+  transition: all 0.15s;
+}
+.new-chat-btn:hover { background: var(--bg-hover); border-color: var(--border-hover); }
+.new-chat-btn i { font-size: 11px; }
+
+.sidebar-section-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 14px 8px 5px;
+  font-weight: 600;
+}
+
+.chat-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.chat-list::-webkit-scrollbar { width: 4px; }
+.chat-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+
+.sidebar-item {
+  padding: 9px 10px;
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sidebar-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+.sidebar-item.active { background: var(--bg-active); color: var(--text-primary); }
+.sidebar-item .item-icon { font-size: 12px; flex-shrink: 0; }
+.sidebar-item .item-text { overflow: hidden; text-overflow: ellipsis; }
+.sidebar-item .delete-btn {
+  display: none;
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px 4px;
+  flex-shrink: 0;
+}
+.sidebar-item:hover .delete-btn { display: block; }
+.sidebar-item .delete-btn:hover { color: #ef5350; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.sidebar-footer-btn {
+  padding: 9px 10px;
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s;
+}
+.sidebar-footer-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+/* =================== MOBILE MENU =================== */
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 10px;
+  left: 12px;
+  z-index: 60;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 49;
+}
+
+/* =================== MAIN =================== */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  position: relative;
+}
+
+.header {
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  flex-shrink: 0;
+  gap: 8px;
+}
+.header-title {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+}
+.header-title .hb { color: var(--accent); }
+.header-badge {
+  font-size: 9px;
+  background: var(--accent);
+  color: #000;
+  padding: 2px 7px;
+  border-radius: 100px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+/* =================== CHAT AREA =================== */
+.chat-area {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  scroll-behavior: smooth;
+}
+.chat-area::-webkit-scrollbar { width: 5px; }
+.chat-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+
+/* =================== WELCOME SCREEN =================== */
+.welcome {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+.welcome-icon {
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+.welcome-icon svg { width: 56px; height: 56px; }
+
+.welcome-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  line-height: 1.3;
+  letter-spacing: -0.3px;
+  max-width: 520px;
+  /* natural wrap */
+}
+.welcome-sub {
+  font-size: 14px;
+  color: var(--text-secondary);
+  max-width: 520px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.suggestion-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  max-width: 500px;
+  margin-bottom: 24px;
+}
+.chip {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 8px 14px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.chip:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--border-hover); }
+
+.welcome-tagline {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.welcome-tagline i { color: var(--accent); font-size: 10px; }
+
+/* =================== MESSAGES =================== */
+.messages-container {
+  max-width: var(--max-content);
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 20px 8px;
+  display: none;
+}
+
+/* Date divider (WhatsApp style) */
+.date-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 16px 0 12px;
+}
+.date-divider span {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 12px;
+  border-radius: 100px;
+}
+
+.message {
+  margin-bottom: 20px;
+  animation: msgIn 0.3s ease-out;
+}
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* User message */
+.msg-user {
+  display: flex;
+  justify-content: flex-end;
+}
+.msg-user .msg-user-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  max-width: 80%;
+}
+.msg-user .msg-bubble {
+  background: var(--bg-secondary);
+  border-radius: 18px 18px 4px 18px;
+  padding: 10px 16px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  position: relative;
+}
+.msg-user .msg-time {
+  text-align: right;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  padding-right: 4px;
+}
+
+/* Bot message */
+.msg-bot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.msg-bot .msg-content {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+.msg-bot .msg-content code {
+  background: rgba(255,255,255,0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.msg-bot .msg-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+.msg-bot .msg-time {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Water badge */
+.water-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--accent);
+  background: rgba(79, 195, 247, 0.08);
+  padding: 3px 9px;
+  border-radius: 100px;
+}
+.water-badge i { font-size: 9px; }
+
+/* Loading */
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  animation: msgIn 0.3s ease-out;
+}
+.loading-dots {
+  display: flex;
+  gap: 4px;
+}
+.loading-dots span {
+  width: 7px;
+  height: 7px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  animation: dotPulse 1.4s ease-in-out infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+.loading-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* =================== COMPOSER =================== */
+.composer-wrapper {
+  flex-shrink: 0;
+  padding: 0 20px 16px;
+}
+.composer {
+  max-width: var(--max-content);
+  margin: 0 auto;
+}
+.composer-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: flex-end;
+  padding: 6px 8px 6px 18px;
+  transition: border-color 0.2s;
+}
+.composer-box:focus-within { border-color: var(--border-hover); }
+
+.composer-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 14.5px;
+  resize: none;
+  max-height: 140px;
+  min-height: 22px;
+  padding: 6px 0;
+  line-height: 1.5;
+}
+.composer-input::placeholder { color: var(--text-muted); }
+
+.send-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+  margin-left: 8px;
+}
+.send-btn:disabled { opacity: 0.25; cursor: default; }
+.send-btn:not(:disabled):hover { opacity: 0.85; }
+
+.composer-footer {
+  text-align: center;
+  padding-top: 7px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.composer-footer a { color: var(--accent); text-decoration: none; }
+.composer-footer a:hover { text-decoration: underline; }
+
+/* =================== SESSION WATER COUNTER =================== */
+.session-water {
+  position: fixed;
+  bottom: 72px;
+  right: 20px;
+  background: rgba(79, 195, 247, 0.08);
+  border: 1px solid rgba(79, 195, 247, 0.15);
+  border-radius: 100px;
+  padding: 5px 12px;
+  font-size: 11px;
+  color: var(--accent);
+  display: none;
+  align-items: center;
+  gap: 5px;
+  z-index: 50;
+  backdrop-filter: blur(10px);
+}
+.session-water.visible { display: inline-flex; cursor: default; }
+
+/* =================== MODAL =================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 520px;
+  max-height: 68vh;
+  overflow-y: auto;
+  padding: 24px;
+}
+.modal::-webkit-scrollbar { width: 4px; }
+.modal::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+.modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.modal .modal-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; }
+.modal-category { margin-bottom: 14px; }
+.modal-category h3 {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.modal-category-items { display: flex; flex-wrap: wrap; gap: 5px; }
+.modal-tag {
+  background: rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+}
+.modal-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: pointer;
+}
+.modal-close:hover { color: var(--text-primary); }
+
+/* =================== RESPONSIVE =================== */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    bottom: 0;
+    z-index: 50;
+    transition: left 0.3s ease;
+    width: 270px;
+  }
+  .sidebar.open { left: 0; }
+  .mobile-menu-btn { display: flex; }
+  .sidebar-overlay.active { display: block; }
+  .welcome-title { font-size: 20px; }
+  .messages-container { padding: 14px; }
+  .composer-wrapper { padding: 0 10px 10px; }
+  .session-water { bottom: 64px; right: 10px; }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  :root { --sidebar-width: 220px; }
+}
+
+/* Copy button */
+.copy-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 6px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-size: 10px;
+  font-family: var(--font);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s;
+}
+.copy-btn:hover { color: var(--text-primary); border-color: var(--border-hover); background: var(--bg-hover); }
+.copy-btn.copied { color: #66bb6a; border-color: rgba(102,187,106,0.3); }
+.copy-btn i { font-size: 10px; }
+
+/* Result box styling for utility responses */
+.result-box {
+  background: rgba(79, 195, 247, 0.06);
+  border: 1px solid rgba(79, 195, 247, 0.12);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 8px 0;
+  font-family: var(--font-mono);
+}
+.result-box .result-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.result-box .result-detail {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.result-box code {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* =================== SETTINGS MODAL =================== */
+.settings-group {
+  margin-bottom: 4px;
+}
+.settings-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.settings-hint {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-top: 3px;
+}
+.settings-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.settings-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.settings-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  outline: none;
+}
+.settings-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+.settings-slider-val {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 24px;
+  text-align: center;
+}
+.settings-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 14px 0;
+}
+.settings-btn {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: var(--radius-xs);
+  font-size: 12px;
+  font-family: var(--font);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+.settings-btn:hover { border-color: var(--border-hover); background: var(--bg-active); }
+.settings-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+.settings-checkbox-row input[type="checkbox"] { margin-top: 3px; accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+.settings-checkbox-label { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.settings-terms { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+.settings-terms p { margin-bottom: 6px; }
+.settings-save-btn {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  padding: 9px 28px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: var(--font);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.settings-save-btn:hover { opacity: 0.85; }
+
+
+/* Water badge - float under last bot message */
+.water-badge-float {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--accent);
+  background: rgba(79, 195, 247, 0.06);
+  padding: 4px 10px;
+  border-radius: 100px;
+  margin-top: 8px;
+  animation: msgIn 0.3s ease-out;
+}
+.water-badge-float i { font-size: 9px; }
+
+</style>
+</head>
+<body>
+
+<!-- MOBILE MENU BUTTON -->
+<button class="mobile-menu-btn" onclick="toggleSidebar()">
+  <i class="fa-solid fa-bars"></i>
+</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <svg class="sidebar-logo-icon" viewBox="0 0 80 80" fill="none">
+      <path d="M22 14C16 14 12 18 12 24V34C12 38 8 40 8 40C8 40 12 42 12 46V56C12 62 16 66 22 66" stroke="#4fc3f7" stroke-width="5" stroke-linecap="round"/>
+      <path d="M58 14C64 14 68 18 68 24V34C68 38 72 40 72 40C72 40 68 42 68 46V56C68 62 64 66 58 66" stroke="#4fc3f7" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="33" cy="35" r="3.5" fill="#e8e8e8"/>
+      <circle cx="47" cy="35" r="3.5" fill="#e8e8e8"/>
+      <path d="M33 48C33 48 36 52 40 52C44 52 47 48 47 48" stroke="#e8e8e8" stroke-width="3" stroke-linecap="round" fill="none"/>
+    </svg>
+    <span class="sidebar-logo-text">NotGPT</span>
+  </div>
+
+  <button class="new-chat-btn" onclick="createNewChat()">
+    <i class="fa-solid fa-plus"></i>
+    New chat
+  </button>
+
+  <div class="sidebar-section-label" id="chatListLabel">Today</div>
+  <div class="chat-list" id="chatList"></div>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-footer-btn" onclick="openModal()">
+      <i class="fa-solid fa-compass"></i>
+      What can I do?
+    </div>
+    <div class="sidebar-footer-btn" onclick="openSettings()">
+      <i class="fa-solid fa-gear"></i>
+      Settings
+    </div>
+    <div class="sidebar-footer-btn" onclick="window.open('https://buymeacoffee.com','_blank')">
+      <i class="fa-solid fa-mug-hot"></i>
+      Buy me a coffee
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="header">
+    <span class="header-title"><span class="hb">{</span> NotGPT <span class="hb">}</span></span>
+    <span class="header-badge">NO AI</span>
+  </div>
+
+  <div class="chat-area" id="chatArea">
+    <div class="welcome" id="welcomeScreen">
+      <div class="welcome-icon">
+        <svg viewBox="0 0 80 80" fill="none">
+          <path d="M22 14C16 14 12 18 12 24V34C12 38 8 40 8 40C8 40 12 42 12 46V56C12 62 16 66 22 66" stroke="#4fc3f7" stroke-width="4" stroke-linecap="round"/>
+          <path d="M58 14C64 14 68 18 68 24V34C68 38 72 40 72 40C72 40 68 42 68 46V56C68 62 64 66 58 66" stroke="#4fc3f7" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="33" cy="35" r="3" fill="#e8e8e8"/>
+          <circle cx="47" cy="35" r="3" fill="#e8e8e8"/>
+          <path d="M33 48C33 48 36 52 40 52C44 52 47 48 47 48" stroke="#e8e8e8" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+      <div class="welcome-title" id="welcomeTitle"></div>
+      <div class="welcome-sub" id="welcomeSub"></div>
+      <div class="suggestion-chips">
+        <div class="chip" onclick="sendMessage('What is 18% of 4500?')">What is 18% of 4500?</div>
+        <div class="chip" onclick="sendMessage('Convert 5 feet 8 inches to cm')">5ft 8in to cm</div>
+        <div class="chip" onclick="sendMessage('Generate a random number between 1 and 100')">Random 1–100</div>
+        <div class="chip" onclick="sendMessage('How many days until December 31 2026?')">Days until New Year</div>
+        <div class="chip" onclick="sendMessage('What can you do?')">What can you do?</div>
+      </div>
+      <div class="welcome-tagline">
+        <i class="fa-solid fa-leaf"></i>
+        Simple tasks. Simple tools. Zero AI. Save water.
+      </div>
+    </div>
+
+    <div class="messages-container" id="messagesContainer"></div>
+  </div>
+
+  <div class="composer-wrapper">
+    <div class="composer">
+      <div class="composer-box">
+        <textarea class="composer-input" id="composerInput"
+          placeholder="Ask me to calculate, convert, generate, or format something..."
+          rows="1" onkeydown="handleKey(event)" oninput="autoGrow(this); toggleSend()"></textarea>
+        <button class="send-btn" id="sendBtn" disabled onclick="sendFromComposer()">
+          <i class="fa-solid fa-arrow-up" style="font-size:13px"></i>
+        </button>
+      </div>
+      <div class="composer-footer">
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SESSION WATER COUNTER -->
+<div class="session-water" id="sessionWater" title="No water saved yet">
+  <i class="fa-solid fa-droplet"></i>
+  <span id="sessionWaterAmount">~0 ml saved</span>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModalDirect()">&times;</button>
+    <h2>What can I do?</h2>
+    <p class="modal-sub">NotGPT uses math, not AI. All of this — without a single drop of AI.</p>
+    <div class="modal-category"><h3><i class="fa-solid fa-calculator"></i> Calculators</h3><div class="modal-category-items"><span class="modal-tag">Percentage</span><span class="modal-tag">Arithmetic</span><span class="modal-tag">Tip</span><span class="modal-tag">Discount</span><span class="modal-tag">Tax</span><span class="modal-tag">Compound interest</span><span class="modal-tag">EMI</span><span class="modal-tag">Average</span><span class="modal-tag">Random numbers</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-calendar-days"></i> Date & Time</h3><div class="modal-category-items"><span class="modal-tag">Age calculator</span><span class="modal-tag">Date difference</span><span class="modal-tag">Add/subtract days</span><span class="modal-tag">Day of the week</span><span class="modal-tag">Timezone conversion</span><span class="modal-tag">Countdown</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-arrows-rotate"></i> Unit Conversion</h3><div class="modal-category-items"><span class="modal-tag">Length</span><span class="modal-tag">Weight</span><span class="modal-tag">Temperature</span><span class="modal-tag">Area</span><span class="modal-tag">Volume</span><span class="modal-tag">Speed</span><span class="modal-tag">Data/storage</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-font"></i> Text Utilities</h3><div class="modal-category-items"><span class="modal-tag">Word count</span><span class="modal-tag">Character count</span><span class="modal-tag">Change case</span><span class="modal-tag">Remove duplicates</span><span class="modal-tag">Sort lines</span><span class="modal-tag">Find & replace</span><span class="modal-tag">Extract emails/URLs</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-code"></i> Developer Tools</h3><div class="modal-category-items"><span class="modal-tag">JSON formatter</span><span class="modal-tag">Base64 encode/decode</span><span class="modal-tag">URL encode/decode</span><span class="modal-tag">UUID generator</span><span class="modal-tag">Hash generation</span><span class="modal-tag">Color conversion</span><span class="modal-tag">Regex tester</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-dice"></i> Generators</h3><div class="modal-category-items"><span class="modal-tag">Password</span><span class="modal-tag">UUID</span><span class="modal-tag">Random number</span><span class="modal-tag">Random choice</span><span class="modal-tag">Lorem ipsum</span><span class="modal-tag">Color palette</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-heart-pulse"></i> Everyday</h3><div class="modal-category-items"><span class="modal-tag">BMI</span><span class="modal-tag">Fuel cost</span><span class="modal-tag">Cooking conversions</span><span class="modal-tag">Recipe scaling</span><span class="modal-tag">Electricity cost</span><span class="modal-tag">Loan/mortgage</span><span class="modal-tag">Shopping discount</span></div></div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsOverlay" onclick="closeSettings(event)">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width:460px">
+    <button class="modal-close" onclick="closeSettingsDirect()">&times;</button>
+    <h2>Settings</h2>
+    <p class="modal-sub">Your preferences. Stored locally in your browser.</p>
+
+    <!-- Chat history limit -->
+    <div class="settings-group">
+      <div class="settings-label">
+        Chats to keep in sidebar
+        <span class="settings-hint">Everything is stored locally in your browser. Nothing leaves your device.</span>
+      </div>
+      <div class="settings-slider-row">
+        <input type="range" id="chatLimitSlider" class="settings-slider" min="1" max="25" value="25" oninput="updateChatLimitLabel(this.value)">
+        <span class="settings-slider-val" id="chatLimitVal">25</span>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="settings-divider"></div>
+
+    <!-- Share feedback -->
+    <div class="settings-group">
+      <div class="settings-label">Share feedback</div>
+      <p class="settings-desc">Found a bug? Have an idea? We'd love to hear from you.</p>
+      <button class="settings-btn" onclick="window.open('mailto:feedback@notgpt.com?subject=NotGPT Feedback','_blank')">
+        <i class="fa-solid fa-envelope"></i> Send feedback
+      </button>
+    </div>
+
+    <!-- Divider -->
+    <div class="settings-divider"></div>
+
+    <!-- Share chats with dev -->
+    <div class="settings-group">
+      <label class="settings-checkbox-row" for="shareChatsToggle">
+        <input type="checkbox" id="shareChatsToggle" onchange="saveSettings()">
+        <div>
+          <span class="settings-checkbox-label">Share chats with developer</span>
+          <span class="settings-hint">Whatever you type in the chatbox will be shared with the developer to improve the tool. This helps us understand common searches and improve utility coverage. Off by default.</span>
+        </div>
+      </label>
+    </div>
+
+    <!-- Divider -->
+    <div class="settings-divider"></div>
+
+    <!-- Terms -->
+    <div class="settings-group">
+      <div class="settings-label">Terms & Conditions</div>
+      <div class="settings-terms">
+        <p>Haven't really thought of keeping terms and conditions for a simple tool. But <strong>don't do anything illegal</strong> with it. What's illegal in your country stays illegal here. Simple as that.</p>
+        <p style="margin-top:8px; color: var(--text-muted);">Also: NotGPT is <strong>not affiliated with OpenAI or ChatGPT</strong>. "GPT" is a trademark of OpenAI. We just think not everything needs it. 🤷</p>
+      </div>
+    </div>
+
+    <!-- Save button -->
+    <div style="margin-top: 16px; text-align: center;">
+      <button class="settings-save-btn" onclick="saveSettings(); closeSettingsDirect();">
+        Save & close
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =================== DATA ===================
+const STORAGE_KEY = 'notgpt_chats';
+const MAX_CHATS = 25;
+const WATER_PER_QUERY_ML = 10;
+
+let allChats = [];
+let activeChatId = null;
+let sessionWaterMl = 0;
+
+// Category emojis for auto-naming
+const categoryEmojis = {
+  percentage: '📊', math: '🔢', tip: '💰', discount: '🏷️', tax: '🧾',
+  date: '📅', age: '🎂', time: '⏰', timezone: '🌍',
+  convert: '🔄', length: '📏', weight: '⚖️', temperature: '🌡️',
+  text: '📝', count: '🔤', case: 'Aa', sort: '↕️',
+  json: '{ }', base64: '🔐', uuid: '🆔', hash: '#️⃣', url: '🔗', regex: '.*',
+  pw: '🔑', random: '🎲', lorem: '📄', color: '🎨',
+  bmi: '💪', fuel: '⛽', cook: '🍳', recipe: '👨‍🍳', loan: '🏦',
+  default: '💬'
+};
+
+// =================== 50 WELCOME MESSAGES ===================
+const welcomeMessages = [
+  { title: "Not every request needs AI.", sub: "Some just need good math. Type what you need — we'll calculate, convert, or generate it. No neurons (artificial or otherwise) harmed." },
+  { title: "Remember Akinator? A no-AI genie.", sub: "We're like that, but for math and utilities. Ask us anything simple — percentages, conversions, random numbers. We guess what tool you need." },
+  { title: "Thanks for deciding to save water. 💧", sub: "Every AI query uses compute. Every compute uses power. Every power plant uses water. For simple tasks, let's skip all that." },
+  { title: "AI is great. But 18% of 4500 is just math.", sub: "You don't need a neural network to calculate a tip. Or convert feet to centimeters. Or format JSON. We handle the simple stuff — the old-fashioned way." },
+  { title: "A calculator never hallucinated.", sub: "Just saying. Ask us to calculate, convert, generate, or format something. Deterministic answers, every single time." },
+  { title: "Your pocket calculator deserves more respect.", sub: "It never needed a GPU cluster. It never drank water. And it never got 2+2 wrong. We're carrying that legacy forward." },
+  { title: "We don't think. We compute.", sub: "And honestly? For most daily tasks, computing is all you need. Try us — percentage, date difference, unit conversion, random numbers..." },
+  { title: "If math can solve it, why ask a robot?", sub: "Type your question naturally. We'll match it to the right tool and give you a precise answer. No LLM, no API calls, no water wasted." },
+  { title: "Simple tools for simple tasks.", sub: "We're not replacing ChatGPT. We're just handling the stuff it shouldn't have to do. Percentages, conversions, generators — all local, all instant." },
+  { title: "Zero AI inside. 100% useful.", sub: "Everything here runs on formulas, algorithms, and basic logic. The way computers were meant to work before everyone added AI to everything." },
+  { title: "Casio called. It wants credit.", sub: "We're basically a Casio with a chat interface. Percentages, conversions, random numbers — the classics. No app subscription required." },
+  { title: "We run on regex and determination.", sub: "No transformer models. No attention heads. Just pattern matching and arithmetic. Ask a question, get an answer. Simple." },
+  { title: "This chat runs on zero watts of guilt.", sub: "No GPUs humming in a data center. No cooling systems draining reservoirs. Just your browser doing honest math." },
+  { title: "Before AI, there was math.", sub: "And math still works. It's fast, precise, and doesn't need a $10 billion training run. Ask me to calculate something." },
+  { title: "The abacus would be proud.", sub: "Thousands of years of computational tools, and the formula hasn't changed: input → math → output. That's us." },
+  { title: "I'm what happens when you don't overthink it.", sub: "Need a percentage? Conversion? Random number? Just ask. No login, no token limits, no existential crisis." },
+  { title: "Fun fact: 2+2 has never been controversial.", sub: "At least not for us. We deal in absolutes — mathematical ones. Try a calculation or conversion." },
+  { title: "I'm a vending machine for math answers.", sub: "Insert question. Receive answer. No AI, no queue, no water used. Available 24/7 because JavaScript never sleeps." },
+  { title: "Not smart. Just accurate.", sub: "We don't understand your question. We pattern-match it. And for calculations and conversions, that's all you need." },
+  { title: "Every AI query uses ~10ml of water.", sub: "That's real. We made this tool so simple tasks don't have to contribute to that. Math locally. Water saved. You're welcome." },
+  { title: "ChatGPT has 100B parameters. We have if-else.", sub: "And for calculating tips and converting units? if-else wins. Every time. Faster, greener, and never wrong." },
+  { title: "Welcome to the anti-AI AI.", sub: "We look like a chatbot but we're really a calculator in a trench coat. Ask us math stuff. We're very good at it." },
+  { title: "The TI-84 was ahead of its time.", sub: "It did math without WiFi, without AI, without a subscription. We're honoring that legacy — in browser form." },
+  { title: "I cost $0 to run. Take that, GPU cluster.", sub: "No servers, no inference costs, no carbon footprint. Just JavaScript and vibes. Try a calculation." },
+  { title: "You found the off-grid calculator.", sub: "While everyone's busy training models on the entire internet, we're here doing 18% of 4500 the honest way." },
+  { title: "Less artificial. More intelligence.", sub: "We actually give you the right answer — with math, not probability. Ask a percentage, conversion, or date question." },
+  { title: "I peaked in the 90s, and I'm okay with that.", sub: "Back when calculators were tools, not apps. Back when 'cloud' meant weather. Ask me something simple — I'll show you the old ways." },
+  { title: "This is a protest app. Against bloat.", sub: "Not every task needs an AI model, a cloud backend, and 4GB of RAM. Some tasks just need JavaScript. Like yours." },
+  { title: "I once calculated 1 million percentages. No sweat.", sub: "Because I don't sweat. Or think. Or hallucinate. I'm a tool, and I'm proud of it. Try me." },
+  { title: "Warning: May cause nostalgia for simpler times.", sub: "When you asked a computer a question and it just... answered. No 'as an AI language model' disclaimers. Just results." },
+  { title: "The greenest query is the one that skips the data center.", sub: "For simple math and conversions, your browser is all you need. We run 100% client-side. Zero emissions." },
+  { title: "I don't learn from your data. I can't.", sub: "I literally have no backend. Your questions stay in your browser. Your privacy is safe because I'm too simple to violate it." },
+  { title: "Built different. Actually.", sub: "No neural networks, no embeddings, no attention mechanisms. Just regex, formulas, and a healthy respect for simplicity." },
+  { title: "Need poetry? Go to ChatGPT. Need 18% of 4500? Stay here.", sub: "We know our lane. And our lane is math, conversions, and random numbers. We're really good in this lane." },
+  { title: "Think of me as the opening act.", sub: "I handle the quick stuff — calculations, conversions, formatting. For the deep stuff, the headliner (ChatGPT) is just a click away." },
+  { title: "I don't dream of electric sheep.", sub: "I dream of nothing because I'm a script tag. But I can calculate, convert, and generate random numbers like nobody's business." },
+  { title: "My carbon footprint is literally zero.", sub: "Okay, your browser uses some power. But compared to a GPU farm? This is basically a rounding error. Ask me something!" },
+  { title: "Honestly? Most of your daily queries don't need AI.", sub: "Tip calculations, unit conversions, date math — all solvable with basic formulas. That's what we're here for." },
+  { title: "We're the decaf of chatbots.", sub: "All the utility, none of the artificial stuff. Works great for everyday tasks. Won't keep a data center up at night." },
+  { title: "No model weights were loaded in the making of this chat.", sub: "Just HTML, CSS, and JavaScript. The holy trinity of the old web. Ask me to calculate something." },
+  { title: "I'm a lookup table with personality.", sub: "My entire intelligence fits in one script tag. And you know what? For percentages and conversions, that's plenty." },
+  { title: "Somewhere, a server just thanked you.", sub: "By using NotGPT for simple tasks, you're giving AI servers a break. They're overworked. Let them rest." },
+  { title: "I don't scale. And that's my superpower.", sub: "No load balancers, no auto-scaling, no rate limits. I run in your browser. I am the edge in edge computing." },
+  { title: "If a calculator and a chatbot had a baby.", sub: "It'd be me. Weird-looking? Maybe. But I can do percentages AND have a conversation about it. Sort of." },
+  { title: "This page weighs less than a ChatGPT response.", sub: "Literally. The entire app is smaller than one GPT-4 output. And we can still calculate tips. Life is good." },
+  { title: "My training data is math class.", sub: "I learned everything I know from formulas, not from scraping the internet. My knowledge is small but provably correct." },
+  { title: "We put the 'no' in innovation.", sub: "No AI. No cloud. No tracking. No subscriptions. Just tools. Sometimes saying no is the most innovative thing you can do." },
+  { title: "I'm what you get when you ask 'do we really need AI for this?'", sub: "The answer is usually no. And I'm here for all those 'no' moments. Percentages, dates, conversions — bring 'em." },
+  { title: "Welcome. I'm the intern.", sub: "ChatGPT is the senior engineer. I'm the intern who's really good at one thing: basic math. But I do it fast and free." },
+  { title: "I may be simple, but at least I'm honest about it.", sub: "I'll tell you exactly what I can and can't do. And what I can't? I'll point you to ChatGPT. No ego here." },
+];
+
+// =================== 15+ LOADING MESSAGES ===================
+const loadingMessages = [
+  "Fixing the leaking tap...", "Carrying the 1...", "Consulting the abacus...",
+  "Crunching without the cloud...", "Running locally... like a fridge...",
+  "Saving a drop of water...", "No GPUs were harmed...", "Dusting off the calculator...",
+  "Asking the math elves...", "Deterministically computing...",
+  "Skipping the AI queue...", "Plugging into pure logic...",
+  "Faster than a token generation...", "The humble algorithm at work...",
+  "Zero carbon. Maximum math...", "Dividing by everything except zero...",
+  "Consulting the ancient scrolls of arithmetic...", "Spinning up the abacus cluster...",
+  "Borrowing from the tens column...", "Recalibrating the slide rule...",
+];
+
+// =================== 50 FALLBACK RESPONSES ===================
+const fallbackResponses = [
+  "Hmm, that sounds like a job for the big guys. 👉 <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>",
+  "I'm flattered you asked, but I'm just a calculator with good vibes. Try <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> for that!",
+  "That one's above my pay grade. I don't have a brain — just really fast math. 👉 <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>",
+  "I wish I could help, but I'm literally a bunch of if-else statements. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> might know though!",
+  "That requires actual intelligence. I only have the artificial-free kind. 👉 <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>",
+  "I'm not that smart — I just pretend well with regex. Try <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>!",
+  "My neurons are made of JavaScript, not silicon. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> is what you need.",
+  "I'm a simple tool in a complex world. For that, you'll want <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>.",
+  "I crunch numbers, not existential questions. 😅 <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> can handle that.",
+  "If I could answer that, I'd be an AI. And then I'd need water cooling. 💧 Try <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>.",
+  "That's a think-y question. I'm more of a calculate-y tool. 👉 <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>",
+  "My skill set: math. My weakness: everything else. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> has you covered!",
+  "A calculator tried to write poetry once. It didn't go well. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> is better at that.",
+  "I ran that through my algorithm and got a shrug. 🤷 <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> might do better.",
+  "That question needs neurons. Real ones or artificial — either way, not mine. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>",
+  "I'm basically a Swiss Army knife — but only the blade and bottle opener. Try <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> for the corkscrew stuff.",
+  "I don't have opinions. I have outputs. For opinions, there's <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>.",
+  "Error 418: I'm a teapot, not a chatbot. ☕ <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> can help!",
+  "I checked all my if-else branches. None of them cover that. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> probably has more branches.",
+  "My parser looked at that and said 'nope'. <a href='https://chat.openai.com' target='_blank'>Ask ChatGPT</a> — it's braver than me.",
+  "I tried. I really tried. But my regex doesn't understand feelings. 💔 <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> might.",
+  "You're overestimating me and I appreciate the confidence. But try <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> for that one.",
+  "If I had a nickel for every question I couldn't answer... I still couldn't count it. Wait, I can count. But I can't answer this. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>!",
+  "That's like asking a toaster to write an essay. I toast numbers, not ideas. 👉 <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>",
+  "My developer only taught me math and conversions. Blame them. Try <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> for the big brain stuff.",
+  "Processing... processing... nah, I got nothing. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> is your friend here.",
+  "I'm not ignoring your question — I genuinely don't know. 🤖 <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> does though.",
+  "I'd need about 175 billion parameters to answer that. I have about 12. Try <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>.",
+  "That's outside my jurisdiction. I only have authority over percentages and unit conversions. 👉 <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>",
+  "My magic 8-ball says 'Ask Again at ChatGPT'. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> is ready for you!",
+  "Look, I'm a calculator in a chat costume. For real conversations, try <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>.",
+  "I searched my entire codebase. It's 400 lines and none of them help here. 👉 <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>",
+  "My IQ is exactly NaN. For smart answers, <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> is right there.",
+  "I'm like a golden retriever — enthusiastic but limited. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> is the one who went to Harvard.",
+  "In a parallel universe, I can answer that. In this one, try <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>.",
+  "My response to that is exactly what you'd expect from a glorified calculator: ¯\\_(ツ)_/¯. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> though...",
+  "I only understand numbers and a few keywords. That had too many of the other kind of words. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> speaks human better.",
+  "I maxed out my computational theory on this one. Which is to say: I have no idea. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> 👉",
+  "That's a great question for something with actual intelligence. May I suggest <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>?",
+  "I'm the equivalent of a 'Hello World' program that got ambitious. For that question, try <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>.",
+  "My training data is literally just Math.js documentation. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> read the whole internet.",
+  "I'm not being lazy — I genuinely can't process that. My brain is a switch statement. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> has the real brain.",
+  "Asking me that is like asking Alexa to do your taxes. In theory possible, in practice: <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>.",
+  "That's the kind of question that separates the AIs from the if-elses. I'm the if-else. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> is the AI.",
+  "My honest answer? I don't know. My helpful answer? <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> probably does. 🙂",
+  "Congratulations, you've found the edge of my abilities. It wasn't far. Try <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> for that.",
+  "I appreciate your faith in me but that's like bringing a spoon to a sword fight. <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> has the sword.",
+  "I did a full diagnostic. Result: I can't do that. Recommendation: <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>.",
+  "My answer would be wrong, and unlike AI, I refuse to be confidently wrong. Try <a href='https://chat.openai.com' target='_blank'>ChatGPT</a> — it's usually right!",
+  "That's a bit like asking a fish to climb a tree. I swim in numbers. For everything else: <a href='https://chat.openai.com' target='_blank'>ChatGPT</a>. 🐟",
+];
+
+// =================== NLP PARSER ENGINE ===================
+
+function parseAndRoute(input) {
+  const text = input.trim();
+  const lower = text.toLowerCase();
+
+  // 1. Check for help/tools triggers
+  if (/^(what can you do|help|tools|\/tools|list tools|what do you support|what do you do|show me what you can do|capabilities|features)\??$/i.test(lower)) {
+    return { type: 'help' };
+  }
+
+  // 2. Try each utility parser in order
+  let result;
+
+  result = tryPercentage(lower, text);
+  if (result) return result;
+
+  result = tryDateDifference(lower, text);
+  if (result) return result;
+
+  result = tryUnitConversionExpanded(lower, text);
+  if (result) return result;
+
+  result = tryRandomNumber(lower, text);
+  if (result) return result;
+
+  result = tryJsonFormat(lower, text);
+  if (result) return result;
+
+
+  result = tryCharCount(lower, text);
+  if (result) return result;
+
+  result = tryWordCount(lower, text);
+  if (result) return result;
+
+  result = tryCaseConvert(lower, text);
+  if (result) return result;
+
+  result = tryArithmetic(lower, text);
+  if (result) return result;
+
+  result = tryBMI(lower, text);
+  if (result) return result;
+
+  // No match → fallback
+  return null;
+}
+
+// ---- PERCENTAGE ----
+function tryPercentage(lower, original) {
+  // Patterns: "what is 18% of 4500", "calculate 20 percent of 500", "20% of 300", "how much is 15% of 2000"
+  const patterns = [
+    /(?:what\s+is|calculate|compute|find|how\s+much\s+is|get|tell\s+me)?\s*(\d+(?:\.\d+)?)\s*(?:%|percent)\s*(?:of)\s*(\d+(?:[\d,]*\d)?(?:\.\d+)?)/i,
+    /(\d+(?:\.\d+)?)\s*(?:%|percent)\s*(?:of)\s*(\d+(?:[\d,]*\d)?(?:\.\d+)?)/i,
+    /(?:what\s+is|calculate|find)\s+(\d+(?:\.\d+)?)\s*(?:%|percent)\s+(?:of\s+)?(\d+(?:[\d,]*\d)?(?:\.\d+)?)/i,
+  ];
+
+  for (const pat of patterns) {
+    const m = lower.match(pat);
+    if (m) {
+      const pct = parseFloat(m[1]);
+      const base = parseFloat(m[2].replace(/,/g, ''));
+      const result = (pct / 100) * base;
+      const formatted = Number.isInteger(result) ? result.toLocaleString() : result.toLocaleString(undefined, { maximumFractionDigits: 2 });
+      const html = `<strong>${pct}%</strong> of <strong>${base.toLocaleString()}</strong> = <strong style="color:var(--accent)">${formatted}</strong>` +
+        `<br><br><span style="font-size:12px;color:var(--text-secondary)">Formula: ${base.toLocaleString()} × ${pct}/100 = ${formatted}</span>`;
+      return { type: 'percentage', html };
+    }
+  }
+  return null;
+}
+
+// ---- DATE DIFFERENCE ----
+function tryDateDifference(lower, original) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // "days until christmas", "days until new year"
+  const specialDates = {
+    'christmas': () => { let d = new Date(today.getFullYear(), 11, 25); if (d <= today) d = new Date(today.getFullYear() + 1, 11, 25); return d; },
+    'new year': () => new Date(today.getFullYear() + 1, 0, 1),
+    'new years': () => new Date(today.getFullYear() + 1, 0, 1),
+    "new year's": () => new Date(today.getFullYear() + 1, 0, 1),
+    "new year's day": () => new Date(today.getFullYear() + 1, 0, 1),
+    'valentine': () => { let d = new Date(today.getFullYear(), 1, 14); if (d <= today) d = new Date(today.getFullYear() + 1, 1, 14); return d; },
+    "valentine's": () => { let d = new Date(today.getFullYear(), 1, 14); if (d <= today) d = new Date(today.getFullYear() + 1, 1, 14); return d; },
+    "valentine's day": () => { let d = new Date(today.getFullYear(), 1, 14); if (d <= today) d = new Date(today.getFullYear() + 1, 1, 14); return d; },
+    'halloween': () => { let d = new Date(today.getFullYear(), 9, 31); if (d <= today) d = new Date(today.getFullYear() + 1, 9, 31); return d; },
+    'thanksgiving': () => { // 4th Thursday in November
+      let year = today.getFullYear();
+      let nov1 = new Date(year, 10, 1);
+      let dayOfWeek = nov1.getDay();
+      let firstThurs = dayOfWeek <= 4 ? (4 - dayOfWeek + 1) : (11 - dayOfWeek + 1);
+      let d = new Date(year, 10, firstThurs + 21);
+      if (d <= today) { year++; nov1 = new Date(year, 10, 1); dayOfWeek = nov1.getDay(); firstThurs = dayOfWeek <= 4 ? (4 - dayOfWeek + 1) : (11 - dayOfWeek + 1); d = new Date(year, 10, firstThurs + 21); }
+      return d;
+    },
+  };
+
+  // Check "days until <special date>"
+  const untilSpecialMatch = lower.match(/(?:how\s+many\s+)?days?\s*(?:until|till|to|before|left\s+(?:until|till|to|for))\s+(.+)/);
+  if (untilSpecialMatch) {
+    const target = untilSpecialMatch[1].replace(/[?.!]+$/, '').trim();
+    for (const [key, fn] of Object.entries(specialDates)) {
+      if (target.includes(key)) {
+        const targetDate = fn();
+        const diffMs = targetDate - today;
+        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        const weeks = Math.floor(diffDays / 7);
+        const remDays = diffDays % 7;
+        const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        const targetStr = months[targetDate.getMonth()] + ' ' + targetDate.getDate() + ', ' + targetDate.getFullYear();
+        let breakdown = `That's about <strong>${weeks} weeks and ${remDays} days</strong>`;
+        const html = `📅 <strong>${diffDays} days</strong> until ${key.charAt(0).toUpperCase() + key.slice(1)}` +
+          `<br><span style="font-size:12px;color:var(--text-secondary)">${targetStr}</span>` +
+          `<br><br><span style="font-size:12px;color:var(--text-secondary)">${breakdown}</span>`;
+        return { type: 'date', html };
+      }
+    }
+
+    // "days until <parsed date>"
+    const parsedTarget = parseDateFuzzy(target);
+    if (parsedTarget) {
+      const diffMs = parsedTarget - today;
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      if (diffDays >= 0) {
+        const weeks = Math.floor(diffDays / 7);
+        const remDays = diffDays % 7;
+        const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        const targetStr = months[parsedTarget.getMonth()] + ' ' + parsedTarget.getDate() + ', ' + parsedTarget.getFullYear();
+        let breakdown = `That's about <strong>${weeks} weeks and ${remDays} days</strong>`;
+        const html = `📅 <strong>${diffDays} days</strong> from today until <strong>${targetStr}</strong>` +
+          `<br><br><span style="font-size:12px;color:var(--text-secondary)">${breakdown}</span>`;
+        return { type: 'date', html };
+      }
+    }
+  }
+
+  // "how many days between X and Y"
+  const betweenMatch = lower.match(/(?:how\s+many\s+)?days?\s*between\s+(.+?)\s+and\s+(.+?)(?:\?|$)/);
+  if (betweenMatch) {
+    let dateStr1 = betweenMatch[1].trim();
+    let dateStr2 = betweenMatch[2].trim();
+
+    const d1 = (dateStr1 === 'today') ? new Date(today) : parseDateFuzzy(dateStr1);
+    const d2 = (dateStr2 === 'today') ? new Date(today) : parseDateFuzzy(dateStr2);
+
+    if (d1 && d2) {
+      const diffMs = Math.abs(d2 - d1);
+      const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+      const weeks = Math.floor(diffDays / 7);
+      const remDays = diffDays % 7;
+      const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      const s1 = months[d1.getMonth()] + ' ' + d1.getDate() + ', ' + d1.getFullYear();
+      const s2 = months[d2.getMonth()] + ' ' + d2.getDate() + ', ' + d2.getFullYear();
+      let yearsDiff = Math.floor(diffDays / 365.25);
+      let remainAfterYears = diffDays - Math.round(yearsDiff * 365.25);
+      let monthsDiff = Math.floor(remainAfterYears / 30.44);
+      let remainDays = remainAfterYears - Math.round(monthsDiff * 30.44);
+      let breakdown = '';
+      if (yearsDiff > 0) breakdown = `≈ ${yearsDiff} year${yearsDiff>1?'s':''}, ${monthsDiff} month${monthsDiff!==1?'s':''}, ${remainDays} day${remainDays!==1?'s':''}`;
+      else if (weeks > 0) breakdown = `That's about ${weeks} week${weeks>1?'s':''} and ${remDays} day${remDays!==1?'s':''}`;
+      const html = `📅 There are <strong style="color:var(--accent)">${diffDays.toLocaleString()} days</strong> between <strong>${s1}</strong> and <strong>${s2}</strong>` +
+        (breakdown ? `<br><br><span style="font-size:12px;color:var(--text-secondary)">${breakdown}</span>` : '');
+      return { type: 'date', html };
+    }
+  }
+
+  return null;
+}
+
+function parseDateFuzzy(str) {
+  str = str.replace(/[,\.]+/g, ' ').replace(/\s+/g, ' ').trim();
+  const monthNames = {
+    jan: 0, january: 0, feb: 1, february: 1, mar: 2, march: 2,
+    apr: 3, april: 3, may: 4, jun: 5, june: 5,
+    jul: 6, july: 6, aug: 7, august: 7, sep: 8, september: 8, sept: 8,
+    oct: 9, october: 9, nov: 10, november: 10, dec: 11, december: 11
+  };
+
+  // "Jan 1 2025", "January 1 2025", "Jan 1, 2025"
+  let m = str.match(/^(\w+)\s+(\d{1,2})\s+(\d{4})$/i);
+  if (m && monthNames[m[1].toLowerCase()] !== undefined) {
+    return new Date(parseInt(m[3]), monthNames[m[1].toLowerCase()], parseInt(m[2]));
+  }
+
+  // "1 Jan 2025", "1 January 2025"
+  m = str.match(/^(\d{1,2})\s+(\w+)\s+(\d{4})$/i);
+  if (m && monthNames[m[2].toLowerCase()] !== undefined) {
+    return new Date(parseInt(m[3]), monthNames[m[2].toLowerCase()], parseInt(m[1]));
+  }
+
+  // "Dec 31 2026", "December 31 2026"
+  m = str.match(/^(\w+)\s+(\d{1,2})(?:\s+(\d{4}))?$/i);
+  if (m && monthNames[m[1].toLowerCase()] !== undefined) {
+    const year = m[3] ? parseInt(m[3]) : new Date().getFullYear();
+    return new Date(year, monthNames[m[1].toLowerCase()], parseInt(m[2]));
+  }
+
+  // "2025-01-01" or "01/01/2025" or "1/1/2025"
+  m = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (m) return new Date(parseInt(m[1]), parseInt(m[2]) - 1, parseInt(m[3]));
+
+  m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) return new Date(parseInt(m[3]), parseInt(m[1]) - 1, parseInt(m[2]));
+
+  return null;
+}
+
+// ---- UNIT CONVERSION ----
+// ============================================================================
+// NotGPT — Expanded Unit Conversion Engine
+// ============================================================================
+// Drop-in replacement for tryUnitConversion(lower, original).
+// Covers: length, weight, temperature, data/storage, speed, area, volume,
+//         cooking, time — with broad alias and NLP pattern support.
+//
+// Returns { type: 'conversion', html: '...' } or null.
+// Relies on the global escapeHtml(text) helper already in the app.
+// ============================================================================
+
+function tryUnitConversionExpanded(lower, original) {
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+
+  /** Format a number nicely: up to `digits` decimals, strip trailing zeros */
+  function fmt(n, digits = 4) {
+    if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toLocaleString();
+    const s = n.toFixed(digits);
+    // strip trailing zeros after decimal
+    return parseFloat(s).toLocaleString(undefined, { maximumFractionDigits: digits });
+  }
+
+  /** Build the standard result HTML using result-box / result-value / result-detail */
+  function makeHtml(emoji, fromVal, fromUnit, toVal, toUnit, formula) {
+    return (
+      `<div class="result-box">` +
+        `<div class="result-value">${emoji} ${escapeHtml(fmt(toVal))} ${escapeHtml(toUnit)}</div>` +
+        `<div class="result-detail">${escapeHtml(fmt(fromVal))} ${escapeHtml(fromUnit)} → ${escapeHtml(fmt(toVal))} ${escapeHtml(toUnit)}</div>` +
+        `<div class="result-detail" style="margin-top:6px;font-size:12px;opacity:0.7">${formula}</div>` +
+      `</div>`
+    );
+  }
+
+  // ── Normalise input ─────────────────────────────────────────────────────
+  // Strip leading filler words so all NLP patterns collapse to "NUM UNIT to UNIT"
+  let s = lower
+    .replace(/^(?:can\s+you\s+)?(?:convert|what\s+is|what'?s|how\s+many|how\s+much\s+is|calculate|compute|find|tell\s+me|please)\s+/i, '')
+    .replace(/\?+$/, '')
+    .trim();
+
+  // "how many [toUnit] in NUM [fromUnit]" → rewrite to "NUM [fromUnit] to [toUnit]"
+  // e.g. "how many cups in 500 ml" → already stripped "how many" → "cups in 500 ml"
+  const howManyFlip = s.match(
+    /^(.+?)\s+in\s+(\d+(?:[,\d]*\d)?(?:\.\d+)?)\s*(.+)$/
+  );
+  if (howManyFlip) {
+    // Only flip when the first token(s) look like a unit (not a number)
+    const maybeUnit = howManyFlip[1].trim();
+    if (!/^\d/.test(maybeUnit)) {
+      s = howManyFlip[2] + ' ' + howManyFlip[3] + ' to ' + maybeUnit;
+    }
+  }
+
+  // ── Master regex: extract value, fromUnit, toUnit ───────────────────────
+  // Patterns matched (after normalisation):
+  //   "1.5 GB to MB"
+  //   "1.5 GB in MB"
+  //   "1.5 GB into MB"
+  //   "1.5 GB as MB"
+  //   "1.5 GB = MB"
+  const master = s.match(
+    /^(-?\d+(?:[,\d]*\d)?(?:\.\d+)?)\s*(.+?)\s+(?:to|in|into|as|=)\s+(.+)$/
+  );
+  if (!master) {
+    // ── Legacy feet-inches compound pattern ─────────────────────────────
+    return tryFeetInchesCompound(lower);
+  }
+
+  const value = parseFloat(master[1].replace(/,/g, ''));
+  const rawFrom = master[2].trim();
+  const rawTo = master[3].trim();
+
+  const fromKey = canonicalUnit(rawFrom);
+  const toKey = canonicalUnit(rawTo);
+
+  if (!fromKey || !toKey) {
+    // One of the units wasn't recognised — fall through to legacy compound
+    return tryFeetInchesCompound(lower);
+  }
+
+  // ── Conversion lookup ───────────────────────────────────────────────────
+  const result = convert(value, fromKey, toKey);
+  if (!result) {
+    return tryFeetInchesCompound(lower);
+  }
+
+  return {
+    type: 'conversion',
+    html: makeHtml(
+      result.emoji,
+      value, displayUnit(fromKey),
+      result.value, displayUnit(toKey),
+      result.formula
+    )
+  };
+
+  // ======================================================================
+  //  UNIT ALIAS MAP — maps any user string to a canonical key
+  // ======================================================================
+  function canonicalUnit(raw) {
+    const u = raw.toLowerCase()
+      .replace(/\s+/g, ' ')
+      .replace(/\.$/, '')
+      .trim();
+
+    const map = {
+      // ── Length ──
+      'mm':1, 'millimeter':1, 'millimeters':1, 'millimetre':1, 'millimetres':1,
+      'cm':2, 'centimeter':2, 'centimeters':2, 'centimetre':2, 'centimetres':2,
+      'm':3, 'meter':3, 'meters':3, 'metre':3, 'metres':3,
+      'km':4, 'kilometer':4, 'kilometers':4, 'kilometre':4, 'kilometres':4,
+      'in':5, 'inch':5, 'inches':5, '"':5,
+      'ft':6, 'foot':6, 'feet':6, "'":6,
+      'yd':7, 'yard':7, 'yards':7,
+      'mi':8, 'mile':8, 'miles':8,
+
+      // ── Weight ──
+      'g':10, 'gram':10, 'grams':10,
+      'kg':11, 'kilogram':11, 'kilograms':11, 'kilo':11, 'kilos':11,
+      'oz':12, 'ounce':12, 'ounces':12,
+      'lb':13, 'lbs':13, 'pound':13, 'pounds':13,
+      'ton':14, 'tons':14, 'tonne':14, 'tonnes':14, 'metric ton':14, 'metric tons':14, 'metric tonne':14, 'metric tonnes':14,
+
+      // ── Temperature ──
+      'c':20, 'celsius':20, 'centigrade':20, '°c':20, 'deg c':20, 'degrees celsius':20, 'degree celsius':20,
+      'f':21, 'fahrenheit':21, '°f':21, 'deg f':21, 'degrees fahrenheit':21, 'degree fahrenheit':21,
+
+      // ── Data/Storage ──
+      'b':30, 'byte':30, 'bytes':30,
+      'kb':31, 'kilobyte':31, 'kilobytes':31,
+      'mb':32, 'megabyte':32, 'megabytes':32,
+      'gb':33, 'gigabyte':33, 'gigabytes':33,
+      'tb':34, 'terabyte':34, 'terabytes':34,
+
+      // ── Speed ──
+      'km/h':40, 'kph':40, 'kmph':40, 'kmh':40, 'kilometers per hour':40, 'kilometres per hour':40, 'kilometer per hour':40, 'kilometre per hour':40,
+      'mph':41, 'miles per hour':41, 'mile per hour':41,
+      'm/s':42, 'meters per second':42, 'metres per second':42, 'meter per second':42, 'metre per second':42, 'mps':42,
+
+      // ── Area ──
+      'sq ft':50, 'sqft':50, 'square foot':50, 'square feet':50, 'ft2':50, 'ft²':50,
+      'sq m':51, 'sqm':51, 'square meter':51, 'square meters':51, 'square metre':51, 'square metres':51, 'm2':51, 'm²':51,
+      'acre':52, 'acres':52,
+      'hectare':53, 'hectares':53, 'ha':53,
+
+      // ── Volume ──
+      'l':60, 'liter':60, 'liters':60, 'litre':60, 'litres':60,
+      'ml':61, 'milliliter':61, 'milliliters':61, 'millilitre':61, 'millilitres':61,
+      'gal':62, 'gallon':62, 'gallons':62, 'us gallon':62, 'us gallons':62,
+      'fl oz':63, 'fluid ounce':63, 'fluid ounces':63, 'fluid oz':63,
+
+      // ── Cooking ──
+      'cup':70, 'cups':70,
+      'tbsp':71, 'tablespoon':71, 'tablespoons':71,
+      'tsp':72, 'teaspoon':72, 'teaspoons':72,
+
+      // ── Time ──
+      'sec':80, 'second':80, 'seconds':80, 'secs':80, 's':80,
+      'min':81, 'minute':81, 'minutes':81, 'mins':81,
+      'hr':82, 'hour':82, 'hours':82, 'hrs':82, 'h':82,
+      'day':83, 'days':83,
+    };
+
+    // Direct match
+    if (map[u] !== undefined) return map[u];
+
+    // Try stripping degree symbol at start: "°c" already covered, but "°f" etc.
+    const stripped = u.replace(/^°\s*/, '');
+    if (map[stripped] !== undefined) return map[stripped];
+
+    return null;
+  }
+
+  // ======================================================================
+  //  DISPLAY NAMES — pretty unit labels for output
+  // ======================================================================
+  function displayUnit(key) {
+    const names = {
+      1:'mm', 2:'cm', 3:'m', 4:'km', 5:'inches', 6:'feet', 7:'yards', 8:'miles',
+      10:'g', 11:'kg', 12:'oz', 13:'lbs', 14:'tonnes',
+      20:'°C', 21:'°F',
+      30:'bytes', 31:'KB', 32:'MB', 33:'GB', 34:'TB',
+      40:'km/h', 41:'mph', 42:'m/s',
+      50:'sq ft', 51:'sq m', 52:'acres', 53:'hectares',
+      60:'liters', 61:'ml', 62:'gallons', 63:'fl oz',
+      70:'cups', 71:'tbsp', 72:'tsp',
+      80:'seconds', 81:'minutes', 82:'hours', 83:'days',
+    };
+    return names[key] || '?';
+  }
+
+  // ======================================================================
+  //  EMOJI for each category
+  // ======================================================================
+  function emojiFor(key) {
+    if (key <= 8) return '📏';   // length
+    if (key <= 14) return '⚖️';  // weight
+    if (key <= 21) return '🌡️';  // temperature
+    if (key <= 34) return '💾';  // data
+    if (key <= 42) return '🏎️';  // speed
+    if (key <= 53) return '📐';  // area
+    if (key <= 63) return '🧪';  // volume
+    if (key <= 72) return '🍳';  // cooking
+    if (key <= 83) return '⏱️';  // time
+    return '🔄';
+  }
+
+  // ======================================================================
+  //  CONVERSION ENGINE
+  // ======================================================================
+  function convert(val, from, to) {
+    if (from === to) {
+      return { value: val, formula: 'Same unit — no conversion needed', emoji: emojiFor(from) };
+    }
+
+    const emoji = emojiFor(from);
+
+    // ── Temperature (special — not ratio-based) ────────────────────────
+    if ((from === 20 && to === 21) || (from === 21 && to === 20)) {
+      if (from === 20) {
+        const r = (val * 9 / 5) + 32;
+        return { value: r, formula: `(${fmt(val)} × 9/5) + 32 = ${fmt(r)} · 1 °C = 33.8 °F`, emoji };
+      } else {
+        const r = (val - 32) * 5 / 9;
+        return { value: r, formula: `(${fmt(val)} − 32) × 5/9 = ${fmt(r)} · 1 °F = −17.2222 °C`, emoji };
+      }
+    }
+
+    // ── Length (all via meters) ─────────────────────────────────────────
+    const lengthToM = { 1:0.001, 2:0.01, 3:1, 4:1000, 5:0.0254, 6:0.3048, 7:0.9144, 8:1609.344 };
+    if (lengthToM[from] !== undefined && lengthToM[to] !== undefined) {
+      const r = val * lengthToM[from] / lengthToM[to];
+      const ratio = lengthToM[from] / lengthToM[to];
+      return { value: r, formula: `1 ${displayUnit(from)} = ${fmt(ratio)} ${displayUnit(to)}`, emoji };
+    }
+
+    // ── Weight (all via grams) ──────────────────────────────────────────
+    const weightToG = { 10:1, 11:1000, 12:28.3495, 13:453.592, 14:1000000 };
+    if (weightToG[from] !== undefined && weightToG[to] !== undefined) {
+      const r = val * weightToG[from] / weightToG[to];
+      const ratio = weightToG[from] / weightToG[to];
+      return { value: r, formula: `1 ${displayUnit(from)} = ${fmt(ratio)} ${displayUnit(to)}`, emoji };
+    }
+
+    // ── Data / Storage (all via bytes) ──────────────────────────────────
+    const dataToB = { 30:1, 31:1024, 32:1048576, 33:1073741824, 34:1099511627776 };
+    if (dataToB[from] !== undefined && dataToB[to] !== undefined) {
+      const r = val * dataToB[from] / dataToB[to];
+      const ratio = dataToB[from] / dataToB[to];
+      return { value: r, formula: `1 ${displayUnit(from)} = ${fmt(ratio)} ${displayUnit(to)}`, emoji };
+    }
+
+    // ── Speed (all via m/) ─────────────────────────────────────────────
+    const speedToMS = { 40: 1/3.6, 41: 0.44704, 42: 1 };
+    if (speedToMS[from] !== undefined && speedToMS[to] !== undefined) {
+      const r = val * speedToMS[from] / speedToMS[to];
+      const ratio = speedToMS[from] / speedToMS[to];
+      return { value: r, formula: `1 ${displayUnit(from)} = ${fmt(ratio)} ${displayUnit(to)}`, emoji };
+    }
+
+    // ── Area (all via sq m) ─────────────────────────────────────────────
+    const areaToSqM = { 50: 0.092903, 51: 1, 52: 4046.8564224, 53: 10000 };
+    if (areaToSqM[from] !== undefined && areaToSqM[to] !== undefined) {
+      const r = val * areaToSqM[from] / areaToSqM[to];
+      const ratio = areaToSqM[from] / areaToSqM[to];
+      return { value: r, formula: `1 ${displayUnit(from)} = ${fmt(ratio, 6)} ${displayUnit(to)}`, emoji };
+    }
+
+    // ── Volume (all via ml) ─────────────────────────────────────────────
+    const volToML = { 60: 1000, 61: 1, 62: 3785.41, 63: 29.5735 };
+    if (volToML[from] !== undefined && volToML[to] !== undefined) {
+      const r = val * volToML[from] / volToML[to];
+      const ratio = volToML[from] / volToML[to];
+      return { value: r, formula: `1 ${displayUnit(from)} = ${fmt(ratio)} ${displayUnit(to)}`, emoji };
+    }
+
+    // ── Cooking (all via ml) — merge with volume ────────────────────────
+    const cookToML = { 70: 236.588, 71: 14.7868, 72: 4.92892 };
+    // Cooking ↔ Cooking
+    if (cookToML[from] !== undefined && cookToML[to] !== undefined) {
+      const r = val * cookToML[from] / cookToML[to];
+      const ratio = cookToML[from] / cookToML[to];
+      return { value: r, formula: `1 ${displayUnit(from)} = ${fmt(ratio)} ${displayUnit(to)}`, emoji };
+    }
+    // Cooking ↔ Volume (cups ↔ ml, tbsp ↔ ml, etc.)
+    const allVolML = { ...volToML, ...cookToML };
+    if (allVolML[from] !== undefined && allVolML[to] !== undefined) {
+      const r = val * allVolML[from] / allVolML[to];
+      const ratio = allVolML[from] / allVolML[to];
+      const e = cookToML[from] !== undefined || cookToML[to] !== undefined ? '🍳' : '🧪';
+      return { value: r, formula: `1 ${displayUnit(from)} = ${fmt(ratio)} ${displayUnit(to)}`, emoji: e };
+    }
+
+    // ── Time (all via seconds) ──────────────────────────────────────────
+    const timeToS = { 80: 1, 81: 60, 82: 3600, 83: 86400 };
+    if (timeToS[from] !== undefined && timeToS[to] !== undefined) {
+      const r = val * timeToS[from] / timeToS[to];
+      const ratio = timeToS[from] / timeToS[to];
+      return { value: r, formula: `1 ${displayUnit(from)} = ${fmt(ratio)} ${displayUnit(to)}`, emoji };
+    }
+
+    // No valid conversion between different categories
+    return null;
+  }
+
+  // ======================================================================
+  //  LEGACY: Feet + Inches compound pattern (e.g. "5 feet 8 inches to cm")
+  // ======================================================================
+  function tryFeetInchesCompound(lwr) {
+    let m;
+
+    // Feet and inches to cm: "5 feet 8 inches to cm", "5ft 8in to cm", "5'8 to cm"
+    m = lwr.match(
+      /(\d+)\s*(?:feet|foot|ft|')[\s,]*(\d+)?\s*(?:inches|inch|in|"|''|)?\s*(?:to|in|into|as|=)\s*(?:cm|centimeters?|centimetres?)/
+    );
+    if (m) {
+      const feet = parseInt(m[1]);
+      const inches = m[2] ? parseInt(m[2]) : 0;
+      const totalInches = feet * 12 + inches;
+      const cm = totalInches * 2.54;
+      return {
+        type: 'conversion',
+        html: makeHtml('📏', totalInches, 'inches', cm, 'cm',
+          `${feet}ft ${inches}in = ${totalInches} inches × 2.54 = ${fmt(cm)} cm`)
+      };
+    }
+
+    // cm to feet+inches: "172 cm to feet", "180cm to feet and inches"
+    m = lwr.match(
+      /(\d+(?:\.\d+)?)\s*(?:cm|centimeters?|centimetres?)\s*(?:to|in|into|as|=)\s*(?:feet|foot|ft|feet\s*(?:and|&)?\s*inches?)/
+    );
+    if (m) {
+      const cm = parseFloat(m[1]);
+      const totalInches = cm / 2.54;
+      const feet = Math.floor(totalInches / 12);
+      const inches = totalInches % 12;
+      return {
+        type: 'conversion',
+        html:
+          `<div class="result-box">` +
+            `<div class="result-value">📏 ${feet}ft ${fmt(inches, 1)}in</div>` +
+            `<div class="result-detail">${fmt(cm)} cm → ${feet}ft ${fmt(inches, 1)}in</div>` +
+            `<div class="result-detail" style="margin-top:6px;font-size:12px;opacity:0.7">${fmt(cm)} ÷ 2.54 = ${fmt(totalInches, 1)} inches = ${feet}ft ${fmt(inches, 1)}in</div>` +
+          `</div>`
+      };
+    }
+
+    return null;
+  }
+}
+
+
+
+// ---- RANDOM NUMBER ----
+function tryRandomNumber(lower, original) {
+  // "roll a dice", "roll dice", "roll a die"
+  if (/roll\s+(?:a\s+)?(?:dice|die|d6)/i.test(lower)) {
+    const result = Math.floor(Math.random() * 6) + 1;
+    const dieFaces = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+    const html = `🎲 You rolled a <strong style="color:var(--accent);font-size:20px">${result}</strong> ${dieFaces[result-1]}`;
+    return { type: 'random', html };
+  }
+
+  // "flip a coin", "coin flip", "heads or tails"
+  if (/flip\s+(?:a\s+)?coin|coin\s+flip|heads\s+or\s+tails/i.test(lower)) {
+    const result = Math.random() < 0.5 ? 'Heads' : 'Tails';
+    const emoji = result === 'Heads' ? '👑' : '🪙';
+    const html = `${emoji} <strong style="color:var(--accent);font-size:18px">${result}!</strong>`;
+    return { type: 'random', html };
+  }
+
+  // "random number between X and Y", "random number 1-100", "give me a random number from 1 to 100"
+  let m = lower.match(/random\s*(?:number|num|int|integer)?\s*(?:between|from)?\s*(\d+)\s*(?:and|to|-|–|—)\s*(\d+)/);
+  if (m) {
+    const min = parseInt(m[1]);
+    const max = parseInt(m[2]);
+    const result = Math.floor(Math.random() * (max - min + 1)) + min;
+    const html = `🎲 Random number between <strong>${min.toLocaleString()}</strong> and <strong>${max.toLocaleString()}</strong>:` +
+      `<br><br><span style="font-size:28px;font-weight:700;color:var(--accent)">${result.toLocaleString()}</span>`;
+    return { type: 'random', html };
+  }
+
+  // "generate a random number"
+  if (/(?:generate|give|pick|get|create)\s+(?:me\s+)?(?:a\s+)?random\s*(?:number|num|int|integer)/i.test(lower)) {
+    const result = Math.floor(Math.random() * 100) + 1;
+    const html = `🎲 Here's a random number (1–100):<br><br><span style="font-size:28px;font-weight:700;color:var(--accent)">${result}</span>` +
+      `<br><span style="font-size:12px;color:var(--text-secondary)">Tip: say "random number between X and Y" for a custom range</span>`;
+    return { type: 'random', html };
+  }
+
+  return null;
+}
+
+// ---- JSON FORMATTER ----
+function tryJsonFormat(lower, original) {
+  const text = original.trim();
+
+  // Check if user explicitly asks to format JSON
+  const isJsonRequest = /format\s*(?:this\s+)?json|make\s*(?:this\s+)?json\s*(?:readable|pretty|nice|formatted)|prettify\s*(?:this\s+)?json|json\s*format|pretty\s*print\s*(?:this\s+)?json|beautify\s*(?:this\s+)?json/i.test(lower);
+
+  let jsonStr = null;
+
+  if (isJsonRequest) {
+    // Try to extract JSON from the message (after the command part)
+    const jsonMatch = text.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
+    if (jsonMatch) {
+      jsonStr = jsonMatch[1];
+    }
+  }
+
+  // Also detect if the entire message IS JSON
+  if (!jsonStr && (text.startsWith('{') || text.startsWith('['))) {
+    try {
+      JSON.parse(text);
+      jsonStr = text;
+    } catch(e) {}
+  }
+
+  if (jsonStr) {
+    try {
+      const parsed = JSON.parse(jsonStr);
+      const formatted = JSON.stringify(parsed, null, 2);
+      const escaped = escapeHtml(formatted);
+      const html = `<strong>{ } Formatted JSON:</strong><br><br>` +
+        `<pre style="background:rgba(255,255,255,0.04);padding:14px;border-radius:8px;overflow-x:auto;font-family:var(--font-mono);font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-all"><code>${escaped}</code></pre>` +
+        `<br><span style="font-size:12px;color:var(--text-secondary)">` +
+        `${typeof parsed === 'object' && parsed !== null ? (Array.isArray(parsed) ? parsed.length + ' items' : Object.keys(parsed).length + ' keys') : 'Valid JSON'} • ` +
+        `${formatted.length.toLocaleString()} chars formatted</span>`;
+      return { type: 'json', html };
+    } catch(e) {
+      if (isJsonRequest) {
+        const html = `<strong>{ } JSON Error:</strong><br><br>` +
+          `<span style="color:#ef5350">⚠️ Couldn't parse that as valid JSON.</span><br><br>` +
+          `<span style="font-size:12px;color:var(--text-secondary)">Error: ${escapeHtml(e.message)}<br>Make sure your JSON is properly formatted with matching brackets and quoted keys.</span>`;
+        return { type: 'json', html };
+      }
+    }
+  }
+
+  // If they asked to format JSON but didn't include any
+  if (isJsonRequest && !jsonStr) {
+    const html = `<strong>{ } JSON Formatter</strong><br><br>` +
+      `I'd love to format your JSON, but I don't see any in your message!<br><br>` +
+      `<span style="font-size:12px;color:var(--text-secondary)">Try pasting your JSON directly, or type something like:<br><code>format this json {"name":"NotGPT","cool":true}</code></span>`;
+    return { type: 'json', html };
+  }
+
+  return null;
+}
+
+
+// ---- CHARACTER COUNT ----
+function tryCharCount(lower, original) {
+  var patterns = [
+    /(?:how\s+many\s+)?(?:characters?|chars?|letters?)\s+(?:in|of|for)\s+["\u201c\u201d'\u2018\u2019]?(.+?)["\u201c\u201d'\u2018\u2019]?\s*\??$/i,
+    /(?:count|get|find|tell me)\s+(?:the\s+)?(?:characters?|chars?|letters?)\s+(?:in|of|for)\s+["\u201c\u201d'\u2018\u2019]?(.+?)["\u201c\u201d'\u2018\u2019]?\s*\??$/i,
+    /(?:character|char|letter)\s+count\s+(?:of|for|in)\s+["\u201c\u201d'\u2018\u2019]?(.+?)["\u201c\u201d'\u2018\u2019]?\s*\??$/i,
+    /(?:length|len)\s+(?:of|for)\s+["\u201c\u201d'\u2018\u2019]?(.+?)["\u201c\u201d'\u2018\u2019]?\s*\??$/i,
+    /(?:how\s+(?:long|many\s+chars?)\s+is)\s+["\u201c\u201d'\u2018\u2019]?(.+?)["\u201c\u201d'\u2018\u2019]?\s*\??$/i,
+  ];
+  for (var i = 0; i < patterns.length; i++) {
+    var match = original.match(patterns[i]);
+    if (match) {
+      var text = match[1].trim().replace(/^["'\u201c\u201d\u2018\u2019]+|["'\u201c\u201d\u2018\u2019]+$/g, '');
+      if (text.length === 0) continue;
+      var charCount = text.length;
+      var charCountNoSpaces = text.replace(/\s/g, '').length;
+      var charMap = {};
+      for (var j = 0; j < text.length; j++) {
+        var ch = text[j].toLowerCase();
+        if (ch === ' ') continue;
+        charMap[ch] = (charMap[ch] || 0) + 1;
+      }
+      var sorted = Object.entries(charMap).sort(function(a, b) { return b[1] - a[1]; });
+      var breakdown = sorted.map(function(pair) {
+        return '<span style="display:inline-block;background:rgba(79,195,247,0.1);padding:2px 8px;border-radius:6px;margin:2px;font-family:var(--font-mono);font-size:13px;">' + escapeHtml(pair[0]) + ' \u00d7 ' + pair[1] + '</span>';
+      }).join(' ');
+      var html = '<div class="result-box"><div class="result-value">' + charCount + ' characters</div><div class="result-detail">' + charCountNoSpaces + ' without spaces</div></div><strong>"' + escapeHtml(text) + '"</strong><br><br><span style="font-size:12px;color:var(--text-secondary);">Character breakdown:</span><br><div style="margin-top:6px;">' + breakdown + '</div>';
+      return { type: 'charcount', html: html };
+    }
+  }
+  return null;
+}
+
+// ---- WORD COUNT + CASE CONVERT ----
+// ============================================================================
+// NotGPT Text Tools — tools-text.js
+// Two deterministic utilities: Word Counter & Case Converter
+// ============================================================================
+
+/**
+ * Tool 1: Word Counter
+ *
+ * Matches natural-language requests like:
+ *   "how many words in The quick brown fox"
+ *   "word count of some paragraph here"
+ *   "count words in hello world"
+ *   "count this: some pasted text"
+ *   "how many words does this have: blah blah"
+ *   A big paste followed by "word count" / "how many words"
+ *
+ * @param  {string} lower    – lowercased user input
+ * @param  {string} original – raw (original-case) user input
+ * @return {{ type: 'wordcount', html: string } | null}
+ */
+function tryWordCount(lower, original) {
+
+  // ── Pattern A: explicit "text" is supplied after a recognisable phrase ──
+  //
+  //   "how many words in <text>"
+  //   "how many words does <text> have"
+  //   "word count of <text>" / "word count for <text>"
+  //   "count words in <text>" / "count the words in <text>"
+  //   "count words of <text>"
+  //
+  // We try these first because they let us isolate the target text cleanly.
+
+  const extractionPatterns = [
+    // "how many words in …" / "how many words are in …"
+    /how many words\s+(?:are\s+)?in\s+(.+)/,
+    // "how many words does … have" / "how many words do … have"
+    /how many words\s+(?:does|do)\s+(.+?)\s+have/,
+    // "word count of …" / "word count for …"
+    /word\s*count\s+(?:of|for)\s+(.+)/,
+    // "count words in …" / "count the words in …" / "count words of …"
+    /count\s+(?:the\s+)?words\s+(?:in|of)\s+(.+)/,
+    // "make this uppercase: text" style — but for counting
+    // "count this: …" / "count these: …"
+    /count\s+(?:this|these)\s*[:\-–—]\s*(.+)/,
+  ];
+
+  let targetText = null;
+
+  for (const pat of extractionPatterns) {
+    const m = lower.match(pat);
+    if (m && m[1]) {
+      // We matched on the lowered string to detect intent, but we want the
+      // original-case text for character-accurate analysis.  Grab the same
+      // tail from `original` using the capture's start index.
+      const tailLength = m[1].length;
+      targetText = original.slice(original.length - tailLength);
+      break;
+    }
+  }
+
+  // ── Pattern B: no explicit extraction, but "word count" / "how many words"
+  //     appears somewhere and there's enough surrounding text to analyse ──
+  //
+  //   User pastes a paragraph then types "word count"
+  //   "how many words" on its own line after a pasted block
+  //   "word count" followed by nothing (the *rest* of the input is the text)
+
+  if (targetText === null) {
+    // Check that intent is present at all
+    const hasIntent =
+      /\b(?:word\s*count|count\s*words|how\s+many\s+words)\b/.test(lower);
+
+    if (!hasIntent) return null;
+
+    // Strip the intent phrase itself and see if meaningful text remains.
+    // We strip from `original` so casing is preserved.
+    const intentPhrases =
+      /\b(?:how\s+many\s+words?|word\s*count|count\s*(?:the\s+)?words?|count\s+this|count\s+these)\b/gi;
+
+    let stripped = original.replace(intentPhrases, '');
+    // Also strip leading colons / dashes that served as separators
+    stripped = stripped.replace(/^\s*[:\-–—]\s*/, '').trim();
+
+    if (stripped.length === 0) return null;   // nothing left to analyse
+    targetText = stripped;
+  }
+
+  // ── Clean up surrounding quotes the user may have wrapped around text ──
+  targetText = targetText.replace(/^["'`""'']+|["'`""'']+$/g, '').trim();
+
+  if (targetText.length === 0) return null;
+
+  // ── Analyse ──
+
+  const text = targetText;
+
+  // Words: split on whitespace, drop empties
+  const words = text.split(/\s+/).filter(Boolean);
+  const wordCount = words.length;
+
+  // Characters
+  const charCountWithSpaces = text.length;
+  const charCountNoSpaces   = text.replace(/\s/g, '').length;
+
+  // Lines (split on actual newlines; a single line has count 1)
+  const lines = text.split(/\r?\n/);
+  const lineCount = lines.length;
+
+  // Sentences — approximate: split on . ! ? (ignoring common abbreviations
+  // like Mr. Mrs. Dr. etc. is hard, so we keep it simple)
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  const sentenceCount = Math.max(sentences.length, wordCount > 0 ? 1 : 0);
+
+  // Average word length
+  const totalLetters = words.reduce((sum, w) => sum + w.length, 0);
+  const avgWordLength = wordCount > 0
+    ? (totalLetters / wordCount).toFixed(1)
+    : '0';
+
+  // ── Truncated preview (so huge pastes don't flood the result) ──
+  const MAX_PREVIEW = 120;
+  const preview = text.length > MAX_PREVIEW
+    ? text.slice(0, MAX_PREVIEW) + '…'
+    : text;
+
+  // ── Build HTML ──
+
+  const html = `
+<div class="result-box">
+  <div class="result-value">${wordCount} word${wordCount !== 1 ? 's' : ''}</div>
+  <div class="result-detail" style="margin-bottom:8px;opacity:0.7;font-style:italic;">
+    "${escapeHtml(preview)}"
+  </div>
+  <div class="result-detail">${charCountWithSpaces.toLocaleString()} characters (${charCountNoSpaces.toLocaleString()} without spaces)</div>
+  <div class="result-detail">${lineCount} line${lineCount !== 1 ? 's' : ''}</div>
+  <div class="result-detail">${sentenceCount} sentence${sentenceCount !== 1 ? 's' : ''} (approximate)</div>
+  <div class="result-detail">Average word length: ${avgWordLength} characters</div>
+</div>`.trim();
+
+  return { type: 'wordcount', html };
+}
+
+
+// ============================================================================
+
+/**
+ * Tool 2: Case Converter
+ *
+ * Matches natural-language requests like:
+ *   "uppercase hello world"
+ *   "make this uppercase: hello world"
+ *   "convert to lowercase: HELLO"
+ *   "title case hello world"
+ *   "capitalize hello world"
+ *   "camelCase hello world"
+ *   "snake_case Hello World"
+ *   "kebab-case Hello World"
+ *
+ * @param  {string} lower    – lowercased user input
+ * @param  {string} original – raw (original-case) user input
+ * @return {{ type: 'case', html: string } | null}
+ */
+function tryCaseConvert(lower, original) {
+
+  // ── Define the case modes we support ──
+  //
+  // Each entry: { id, label, pattern (regex on lowered input), convert(text) }
+  // The pattern MUST have a named group `text` OR we extract text separately.
+
+  const modes = [
+    {
+      id: 'upper',
+      label: 'UPPER CASE',
+      // "uppercase …", "upper case …", "to uppercase …",
+      // "make … uppercase", "convert … to uppercase"
+      patterns: [
+        /(?:(?:convert|change|make|transform)\s+(?:this\s+)?(?:to\s+)?upper\s*case|(?:to\s+)?upper\s*case)\s*[:\-–—]?\s*(.+)/,
+        /(.+?)\s+(?:to|in)\s+upper\s*case\s*$/,
+      ],
+      convert: t => t.toUpperCase(),
+    },
+    {
+      id: 'lower',
+      label: 'lower case',
+      patterns: [
+        /(?:(?:convert|change|make|transform)\s+(?:this\s+)?(?:to\s+)?lower\s*case|(?:to\s+)?lower\s*case)\s*[:\-–—]?\s*(.+)/,
+        /(.+?)\s+(?:to|in)\s+lower\s*case\s*$/,
+      ],
+      convert: t => t.toLowerCase(),
+    },
+    {
+      id: 'title',
+      label: 'Title Case',
+      patterns: [
+        /(?:(?:convert|change|make|transform)\s+(?:this\s+)?(?:to\s+)?title\s*case|(?:to\s+)?title\s*case)\s*[:\-–—]?\s*(.+)/,
+        /(.+?)\s+(?:to|in)\s+title\s*case\s*$/,
+      ],
+      convert: t => t.replace(
+        /\w\S*/g,
+        w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+      ),
+    },
+    {
+      id: 'capitalize',
+      label: 'Capitalized (first letter)',
+      patterns: [
+        /(?:(?:convert|change|make|transform)\s+(?:this\s+)?(?:to\s+)?capitaliz(?:e|ed)|capitaliz(?:e|ed))\s*[:\-–—]?\s*(.+)/,
+      ],
+      convert: t => t.charAt(0).toUpperCase() + t.slice(1),
+    },
+    {
+      id: 'camel',
+      label: 'camelCase',
+      patterns: [
+        /(?:(?:convert|change|make|transform)\s+(?:this\s+)?(?:to\s+)?camel\s*case|(?:to\s+)?camel\s*case)\s*[:\-–—]?\s*(.+)/,
+        /(.+?)\s+(?:to|in)\s+camel\s*case\s*$/,
+      ],
+      convert: t => {
+        const words = t.trim().split(/[\s_\-]+/).filter(Boolean);
+        return words
+          .map((w, i) =>
+            i === 0
+              ? w.toLowerCase()
+              : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+          )
+          .join('');
+      },
+    },
+    {
+      id: 'snake',
+      label: 'snake_case',
+      patterns: [
+        /(?:(?:convert|change|make|transform)\s+(?:this\s+)?(?:to\s+)?snake[\s_]*case|(?:to\s+)?snake[\s_]*case)\s*[:\-–—]?\s*(.+)/,
+        /(.+?)\s+(?:to|in)\s+snake[\s_]*case\s*$/,
+      ],
+      convert: t => {
+        return t
+          .trim()
+          // Insert underscore before uppercase letters in camelCase input
+          .replace(/([a-z])([A-Z])/g, '$1_$2')
+          // Replace spaces, hyphens, multiple underscores with single _
+          .replace(/[\s\-]+/g, '_')
+          .replace(/_+/g, '_')
+          .toLowerCase();
+      },
+    },
+    {
+      id: 'kebab',
+      label: 'kebab-case',
+      patterns: [
+        /(?:(?:convert|change|make|transform)\s+(?:this\s+)?(?:to\s+)?kebab[\s\-]*case|(?:to\s+)?kebab[\s\-]*case)\s*[:\-–—]?\s*(.+)/,
+        /(.+?)\s+(?:to|in)\s+kebab[\s\-]*case\s*$/,
+      ],
+      convert: t => {
+        return t
+          .trim()
+          .replace(/([a-z])([A-Z])/g, '$1-$2')
+          .replace(/[\s_]+/g, '-')
+          .replace(/-+/g, '-')
+          .toLowerCase();
+      },
+    },
+  ];
+
+  // ── Try each mode's patterns against `lower` ──
+
+  for (const mode of modes) {
+    for (const pat of mode.patterns) {
+      const m = lower.match(pat);
+      if (!m || !m[1]) continue;
+
+      // Extract the original-case text (same tail length trick as word count)
+      const capturedLower = m[1].trim();
+      if (capturedLower.length === 0) continue;
+
+      // Find where the captured group starts in the original string.
+      // Because lowercasing preserves length, the index in `lower` maps
+      // directly to `original`.
+      const captureStart = m.index + m[0].indexOf(m[1]);
+      let targetText = original.slice(captureStart, captureStart + m[1].length).trim();
+
+      // Strip wrapping quotes
+      targetText = targetText.replace(/^["'`""'']+|["'`""'']+$/g, '').trim();
+      if (targetText.length === 0) continue;
+
+      // Convert
+      const converted = mode.convert(targetText);
+
+      // Build HTML
+      const html = `
+<div class="result-box">
+  <div class="result-value">${escapeHtml(converted)}</div>
+  <div class="result-detail" style="margin-top:6px;">
+    Converted to <strong>${escapeHtml(mode.label)}</strong>
+  </div>
+  <div class="result-detail" style="opacity:0.65;">
+    Original: "${escapeHtml(targetText)}"
+  </div>
+</div>`.trim();
+
+      return { type: 'case', html };
+    }
+  }
+
+  return null;
+}
+
+
+// ---- ARITHMETIC + BMI ----
+// =================== TOOL: BASIC ARITHMETIC ===================
+// Safe math evaluator — NO eval(). Tokenizes, respects order of operations,
+// handles parentheses, unary minus, and multi-operation expressions.
+
+function tryArithmetic(lower, original) {
+  // ---- Gate: only proceed if this looks like a math expression ----
+  const mathSignals = /(\d\s*[\+\-\*\/\^%×÷]\s*\d|plus|minus|times|divided|multiplied|mod(?:ulo)?|square\s*root|sqrt|power|raise|\bsum\b|\bproduct\b)/i;
+  if (!mathSignals.test(lower)) return null;
+
+  // ---- Normalise the input into a math-ready string ----
+  let expr = original.trim();
+
+  // Strip leading conversational fluff
+  expr = expr.replace(/^(?:what\s+is|what's|calculate|compute|evaluate|solve|find|tell\s+me|how\s+much\s+is|can\s+you\s+(?:calculate|compute|solve|evaluate))\s*/i, '');
+  expr = expr.replace(/[?!]+$/g, '').trim();
+
+  // ---- Handle "square root of N" / "sqrt N" first (before generic normalisation) ----
+  const sqrtWordMatch = expr.match(/^(?:(?:the\s+)?square\s*root\s*(?:of\s*)?)(\d+(?:\.\d+)?)\s*$/i);
+  if (sqrtWordMatch) {
+    const n = parseFloat(sqrtWordMatch[1]);
+    if (n < 0) return _mathError('Cannot take the square root of a negative number.');
+    const result = Math.sqrt(n);
+    return _mathResult(`√${formatNum(n)}`, result);
+  }
+  const sqrtFnMatch = expr.match(/^sqrt\s*\(?\s*(\d+(?:\.\d+)?)\s*\)?\s*$/i);
+  if (sqrtFnMatch) {
+    const n = parseFloat(sqrtFnMatch[1]);
+    if (n < 0) return _mathError('Cannot take the square root of a negative number.');
+    const result = Math.sqrt(n);
+    return _mathResult(`√${formatNum(n)}`, result);
+  }
+
+  // ---- Handle "A to the power of B" / "A raised to B" ----
+  const powerWordMatch = expr.match(/(\d+(?:\.\d+)?)\s+(?:to\s+the\s+power\s+of|raised\s+to(?:\s+the\s+power\s+of)?)\s+(\d+(?:\.\d+)?)/i);
+  if (powerWordMatch) {
+    const base = parseFloat(powerWordMatch[1]);
+    const exp = parseFloat(powerWordMatch[2]);
+    const result = Math.pow(base, exp);
+    return _mathResult(`${formatNum(base)} ^ ${formatNum(exp)}`, result);
+  }
+
+  // ---- Normalise operators from words / symbols to canonical form ----
+  let normalised = expr;
+
+  // Word operators → symbols  (order matters: longest first)
+  normalised = normalised.replace(/\bplus\b/gi, '+');
+  normalised = normalised.replace(/\bminus\b/gi, '-');
+  normalised = normalised.replace(/\btimes\b/gi, '*');
+  normalised = normalised.replace(/\bmultiplied\s+by\b/gi, '*');
+  normalised = normalised.replace(/\bdivided\s+by\b/gi, '/');
+  normalised = normalised.replace(/\bmod(?:ulo)?\b/gi, '%');
+  normalised = normalised.replace(/\bover\b/gi, '/');
+
+  // Unicode / alternate symbols
+  normalised = normalised.replace(/×/g, '*');
+  normalised = normalised.replace(/÷/g, '/');
+  normalised = normalised.replace(/\*\*/g, '^');
+
+  // Strip commas inside numbers (e.g. 1,000)
+  normalised = normalised.replace(/(\d),(\d{3})/g, '$1$2');
+
+  // Strip any remaining non-math characters (letters, etc.) but keep digits, ops, parens, dots, spaces
+  normalised = normalised.replace(/[^0-9+\-*/%^().e\s]/gi, '');
+  normalised = normalised.trim();
+
+  // If nothing meaningful remains, bail
+  if (!normalised || !/\d/.test(normalised)) return null;
+
+  // ---- Tokenise ----
+  const tokens = _tokenise(normalised);
+  if (!tokens) return null;
+
+  // Must contain at least one operator (otherwise it's just a bare number, not "arithmetic")
+  const hasOperator = tokens.some(t => t.type === 'op');
+  if (!hasOperator) return null;
+
+  // ---- Evaluate via recursive-descent parser (respects order of operations) ----
+  try {
+    const result = _evaluate(tokens);
+
+    // Build a clean display expression from the normalised form
+    const displayExpr = _buildDisplayExpr(normalised, original);
+
+    return _mathResult(displayExpr, result);
+  } catch (e) {
+    return _mathError(e.message);
+  }
+}
+
+// ---- Tokeniser: string → token array ----
+function _tokenise(str) {
+  const tokens = [];
+  let i = 0;
+  const s = str.replace(/\s+/g, '');
+
+  while (i < s.length) {
+    const ch = s[i];
+
+    // Number (including decimals and scientific notation like 1e5)
+    if (/[0-9.]/.test(ch)) {
+      let num = '';
+      while (i < s.length && /[0-9.eE]/.test(s[i])) {
+        num += s[i];
+        // Handle e+ or e-
+        if ((s[i] === 'e' || s[i] === 'E') && i + 1 < s.length && (s[i + 1] === '+' || s[i + 1] === '-')) {
+          num += s[++i];
+        }
+        i++;
+      }
+      const val = parseFloat(num);
+      if (isNaN(val)) return null;
+      tokens.push({ type: 'num', value: val });
+      continue;
+    }
+
+    // Operators
+    if ('+-*/%^'.includes(ch)) {
+      tokens.push({ type: 'op', value: ch });
+      i++;
+      continue;
+    }
+
+    // Parentheses
+    if (ch === '(') { tokens.push({ type: 'lparen' }); i++; continue; }
+    if (ch === ')') { tokens.push({ type: 'rparen' }); i++; continue; }
+
+    // Skip unknown
+    i++;
+  }
+
+  return tokens.length > 0 ? tokens : null;
+}
+
+// ---- Recursive-descent evaluator ----
+// Grammar (ascending precedence):
+//   expr     → term (('+' | '-') term)*
+//   term     → exponent (('*' | '/' | '%') exponent)*
+//   exponent → unary ('^' unary)*          (right-associative)
+//   unary    → ('-')* atom
+//   atom     → NUMBER | '(' expr ')'
+
+function _evaluate(tokens) {
+  let pos = 0;
+
+  var peek = function() { return pos < tokens.length ? tokens[pos] : null; }
+  var consume = function() { return tokens[pos++]; }
+
+  var parseExpr = function() {
+    let left = parseTerm();
+    while (peek() && peek().type === 'op' && (peek().value === '+' || peek().value === '-')) {
+      const op = consume().value;
+      const right = parseTerm();
+      left = op === '+' ? left + right : left - right;
+    }
+    return left;
+  }
+
+  var parseTerm = function() {
+    let left = parseExponent();
+    while (peek() && peek().type === 'op' && (peek().value === '*' || peek().value === '/' || peek().value === '%')) {
+      const op = consume().value;
+      const right = parseExponent();
+      if (op === '/') {
+        if (right === 0) throw new Error('Division by zero');
+        left = left / right;
+      } else if (op === '%') {
+        if (right === 0) throw new Error('Division by zero (modulo)');
+        left = left % right;
+      } else {
+        left = left * right;
+      }
+    }
+    return left;
+  }
+
+  var parseExponent = function() {
+    const base = parseUnary();
+    if (peek() && peek().type === 'op' && peek().value === '^') {
+      consume();
+      const exp = parseExponent(); // right-associative: recurse into self
+      return Math.pow(base, exp);
+    }
+    return base;
+  }
+
+  var parseUnary = function() {
+    let negCount = 0;
+    while (peek() && peek().type === 'op' && peek().value === '-') {
+      consume();
+      negCount++;
+    }
+    let val = parseAtom();
+    if (negCount % 2 === 1) val = -val;
+    return val;
+  }
+
+  var parseAtom = function() {
+    const tok = peek();
+    if (!tok) throw new Error('Unexpected end of expression');
+
+    if (tok.type === 'num') {
+      consume();
+      return tok.value;
+    }
+
+    if (tok.type === 'lparen') {
+      consume(); // eat '('
+      const val = parseExpr();
+      const closing = consume();
+      if (!closing || closing.type !== 'rparen') throw new Error('Missing closing parenthesis');
+      return val;
+    }
+
+    // Handle unary + at atom level (just skip it)
+    if (tok.type === 'op' && tok.value === '+') {
+      consume();
+      return parseAtom();
+    }
+
+    throw new Error('Unexpected token');
+  }
+
+  const result = parseExpr();
+
+  // Make sure we consumed everything
+  if (pos < tokens.length) throw new Error('Unexpected input after expression');
+
+  if (!isFinite(result)) throw new Error('Result is not finite');
+
+  return result;
+}
+
+// ---- Build a readable display expression ----
+function _buildDisplayExpr(normalised, original) {
+  // Clean up the normalised expression for display
+  let display = normalised;
+  // Add spaces around operators for readability
+  display = display.replace(/([+\-*/%^])/g, ' $1 ');
+  // Collapse multiple spaces
+  display = display.replace(/\s{2,}/g, ' ').trim();
+  // Don't show leading unary as "  - 5"
+  display = display.replace(/^\s*-\s+/, '-');
+  return display;
+}
+
+// ---- Format a number for display ----
+function formatNum(n) {
+  if (Number.isInteger(n) && Math.abs(n) < 1e15) {
+    return n.toLocaleString();
+  }
+  // Floating point — limit fraction digits
+  const str = n.toFixed(10).replace(/\.?0+$/, '');
+  const val = parseFloat(str);
+  if (Math.abs(val) >= 1e15 || (Math.abs(val) < 1e-6 && val !== 0)) {
+    return n.toExponential(6);
+  }
+  return val.toLocaleString(undefined, { maximumFractionDigits: 10 });
+}
+
+// ---- Build result HTML ----
+function _mathResult(expression, value) {
+  const displayValue = formatNum(value);
+  const safeExpr = escapeHtml(expression);
+  const html =
+    `<div class="result-box">` +
+      `<div class="result-value">${escapeHtml(displayValue)}</div>` +
+      `<div class="result-detail">` +
+        `${safeExpr} = ${escapeHtml(displayValue)}` +
+      `</div>` +
+    `</div>`;
+  return { type: 'math', html };
+}
+
+function _mathError(message) {
+  const html =
+    `<div class="result-box" style="border-color: rgba(239,83,80,0.25); background: rgba(239,83,80,0.06);">` +
+      `<div class="result-value" style="color:#ef5350;">Error</div>` +
+      `<div class="result-detail">${escapeHtml(message)}</div>` +
+    `</div>`;
+  return { type: 'math', html };
+}
+
+
+// =================== TOOL: BMI CALCULATOR ===================
+
+function tryBMI(lower, original) {
+  // ---- Gate: must mention "bmi" ----
+  if (!/\bbmi\b/i.test(lower)) return null;
+
+  const text = original.trim();
+
+  let heightCm = null;
+  let weightKg = null;
+  let heightDisplay = '';
+  let weightDisplay = '';
+
+  // ---- Extract height ----
+
+  // Feet and inches: 5'8, 5 feet 8 inches, 5ft8in, 5 foot 8, 5'8"
+  const ftInPatterns = [
+    /(\d+)\s*(?:'|ft|feet|foot)\s*(\d+)\s*(?:"|''|in|inches|inch)?/i,
+    /(\d+)\s*(?:'|ft|feet|foot)(?:\s|$)/i,
+    /height\s*:?\s*(\d+)\s*(?:'|ft|feet|foot)\s*(\d+)?\s*(?:"|''|in|inches|inch)?/i,
+  ];
+
+  for (const pat of ftInPatterns) {
+    const m = text.match(pat);
+    if (m) {
+      const feet = parseInt(m[1]);
+      const inches = m[2] ? parseInt(m[2]) : 0;
+      if (feet >= 3 && feet <= 8 && inches >= 0 && inches <= 11) {
+        heightCm = (feet * 12 + inches) * 2.54;
+        heightDisplay = inches > 0 ? `${feet}ft ${inches}in (${heightCm.toFixed(1)} cm)` : `${feet}ft (${heightCm.toFixed(1)} cm)`;
+        break;
+      }
+    }
+  }
+
+  // Centimeters: 170 cm, 170cm, height 170 cm
+  if (!heightCm) {
+    const cmMatch = text.match(/(\d{2,3})\s*cm\b/i);
+    if (cmMatch) {
+      const val = parseFloat(cmMatch[1]);
+      if (val >= 50 && val <= 280) {
+        heightCm = val;
+        heightDisplay = `${val} cm`;
+      }
+    }
+  }
+
+  // ---- Extract weight ----
+
+  // Kilograms: 70 kg, 70kg, weight 70 kg
+  const kgMatch = text.match(/(\d+(?:\.\d+)?)\s*kg\b/i);
+  if (kgMatch) {
+    const val = parseFloat(kgMatch[1]);
+    if (val >= 20 && val <= 400) {
+      weightKg = val;
+      weightDisplay = `${val} kg`;
+    }
+  }
+
+  // Pounds: 154 pounds, 154 lbs, 154 lb, weight 154 pounds
+  if (!weightKg) {
+    const lbMatch = text.match(/(\d+(?:\.\d+)?)\s*(?:pounds?|lbs?)\b/i);
+    if (lbMatch) {
+      const lbs = parseFloat(lbMatch[1]);
+      if (lbs >= 44 && lbs <= 880) {
+        weightKg = lbs * 0.453592;
+        weightDisplay = `${lbs} lbs (${weightKg.toFixed(1)} kg)`;
+      }
+    }
+  }
+
+  // ---- Fallback: try to infer from two bare numbers + context ----
+  // "bmi 75 kg 180 cm" or "bmi 180 cm 75 kg" — already handled above via kg/cm patterns
+  // "bmi calculator 65kg 165cm" — also handled
+  // If we still don't have both, try to disambiguate bare numbers near unit hints
+  if (!heightCm || !weightKg) {
+    // Try extracting all numbers from the string
+    const nums = [];
+    const numRe = /(\d+(?:\.\d+)?)/g;
+    let nm;
+    while ((nm = numRe.exec(lower)) !== null) {
+      nums.push(parseFloat(nm[1]));
+    }
+
+    // Heuristic: if exactly two numbers, one is plausibly height-cm (100-250) and one is weight-kg (30-200)
+    if (nums.length >= 2) {
+      const candidates = nums.filter(n => n >= 30);
+      for (let i = 0; i < candidates.length && (!heightCm || !weightKg); i++) {
+        const n = candidates[i];
+        if (!heightCm && n >= 100 && n <= 250) {
+          heightCm = n;
+          heightDisplay = `${n} cm (inferred)`;
+        } else if (!weightKg && n >= 30 && n <= 200) {
+          weightKg = n;
+          weightDisplay = `${n} kg (inferred)`;
+        }
+      }
+    }
+  }
+
+  // ---- If we couldn't extract both, give a helpful message ----
+  if (!heightCm || !weightKg) {
+    if (!heightCm && !weightKg) return null; // Probably not actually a BMI request with data
+    const missing = !heightCm ? 'height' : 'weight';
+    const html =
+      `<div class="result-box" style="border-color: rgba(255,183,77,0.3); background: rgba(255,183,77,0.06);">` +
+        `<div class="result-value" style="color:#ffb74d;">Missing ${escapeHtml(missing)}</div>` +
+        `<div class="result-detail">` +
+          `I found ${!heightCm ? 'your weight' : 'your height'} but not your ${missing}.<br>` +
+          `Try: <em>"BMI for 170 cm and 65 kg"</em> or <em>"BMI height 5'8 weight 154 lbs"</em>` +
+        `</div>` +
+      `</div>`;
+    return { type: 'bmi', html };
+  }
+
+  // ---- Calculate BMI ----
+  const heightM = heightCm / 100;
+  const bmi = weightKg / (heightM * heightM);
+  const bmiRounded = Math.round(bmi * 10) / 10;
+
+  // ---- Category + colour ----
+  let category, color, bgTint;
+  if (bmi < 18.5) {
+    category = 'Underweight';
+    color = '#4fc3f7';      // light blue
+    bgTint = 'rgba(79,195,247,0.08)';
+  } else if (bmi < 25) {
+    category = 'Normal';
+    color = '#66bb6a';      // green
+    bgTint = 'rgba(102,187,106,0.08)';
+  } else if (bmi < 30) {
+    category = 'Overweight';
+    color = '#ffb74d';      // amber/yellow
+    bgTint = 'rgba(255,183,77,0.08)';
+  } else {
+    category = 'Obese';
+    color = '#ef5350';      // red
+    bgTint = 'rgba(239,83,80,0.08)';
+  }
+
+  // ---- Build the visual scale bar ----
+  // Scale: BMI 10–40 mapped to 0–100%
+  const scaleMin = 10, scaleMax = 40;
+  const pct = Math.max(0, Math.min(100, ((bmi - scaleMin) / (scaleMax - scaleMin)) * 100));
+
+  const scaleBar =
+    `<div style="margin:14px 0 8px; position:relative; height:10px; border-radius:5px; overflow:hidden; ` +
+      `background: linear-gradient(to right, #4fc3f7 0%, #66bb6a 28%, #66bb6a 50%, #ffb74d 67%, #ef5350 100%);">` +
+      `<div style="position:absolute; top:-3px; left:calc(${pct.toFixed(1)}% - 4px); ` +
+        `width:8px; height:16px; background:#fff; border-radius:3px; box-shadow:0 0 4px rgba(0,0,0,0.4);"></div>` +
+    `</div>` +
+    `<div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-bottom:6px;">` +
+      `<span>Underweight</span><span>Normal</span><span>Overweight</span><span>Obese</span>` +
+    `</div>`;
+
+  // ---- Compose HTML ----
+  const html =
+    `<div class="result-box" style="border-color: ${color}30; background: ${bgTint};">` +
+      `<div style="display:flex; align-items:baseline; gap:10px; margin-bottom:2px;">` +
+        `<div class="result-value" style="font-size:32px; color:${color};">${bmiRounded}</div>` +
+        `<div style="font-size:15px; font-weight:600; color:${color};">${category}</div>` +
+      `</div>` +
+      scaleBar +
+      `<div class="result-detail" style="margin-top:8px;">` +
+        `<strong>Height:</strong> ${escapeHtml(heightDisplay)}<br>` +
+        `<strong>Weight:</strong> ${escapeHtml(weightDisplay)}<br>` +
+        `<span style="margin-top:4px; display:inline-block;">Formula: ${escapeHtml(weightKg.toFixed(1))} kg ÷ (${escapeHtml(heightM.toFixed(2))} m)² = ${bmiRounded}</span>` +
+      `</div>` +
+    `</div>`;
+
+  return { type: 'bmi', html };
+}
+
+
+// =================== INIT ===================
+function init() {
+  // Fix the modal heading
+  const modalH2 = document.querySelector('.modal h2');
+  if (modalH2 && modalH2.textContent === 'What can NotGPT do?') {
+    modalH2.textContent = 'What can I do?';
+  }
+
+  loadChats();
+  if (allChats.length === 0) {
+    createNewChat(true);
+  } else {
+    activeChatId = allChats[0].id;
+    renderChatList();
+    loadChat(activeChatId);
+  }
+  setWelcomeMessage();
+  document.getElementById('composerInput').focus();
+}
+
+// =================== CHAT STORAGE ===================
+function loadChats() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    allChats = data ? JSON.parse(data) : [];
+  } catch(e) { allChats = []; }
+}
+
+function saveChats() {
+  if (allChats.length > MAX_CHATS) {
+    allChats = allChats.slice(0, MAX_CHATS);
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(allChats));
+  } catch(e) {}
+}
+
+function getActiveChat() {
+  return allChats.find(c => c.id === activeChatId);
+}
+
+// =================== CHAT NAMING ===================
+function getCategoryEmoji(text) {
+  const lower = text.toLowerCase();
+  if (/%|percent/.test(lower)) return categoryEmojis.percentage;
+  if (/\+|-|\*|\/|add|subtract|multiply|divide|sum|arithmetic/.test(lower)) return categoryEmojis.math;
+  if (/tip/.test(lower)) return categoryEmojis.tip;
+  if (/discount/.test(lower)) return categoryEmojis.discount;
+  if (/tax/.test(lower)) return categoryEmojis.tax;
+  if (/age|birthday|born/.test(lower)) return categoryEmojis.age;
+  if (/date|day|month|year|between.*and/.test(lower)) return categoryEmojis.date;
+  if (/time|hour|minute|second/.test(lower)) return categoryEmojis.time;
+  if (/timezone|utc|ist|pst|est/.test(lower)) return categoryEmojis.timezone;
+  if (/convert|feet|inch|cm|meter|mile|kg|pound|lb|fahrenheit|celsius/.test(lower)) return categoryEmojis.convert;
+  if (/length/.test(lower)) return categoryEmojis.length;
+  if (/weight/.test(lower)) return categoryEmojis.weight;
+  if (/temperature|°/.test(lower)) return categoryEmojis.temperature;
+  if (/word.*count|character.*count|count.*word/.test(lower)) return categoryEmojis.count;
+  if (/uppercase|lowercase|camel|case/.test(lower)) return categoryEmojis.case;
+  if (/sort/.test(lower)) return categoryEmojis.sort;
+  if (/json/.test(lower)) return categoryEmojis.json;
+  if (/base64/.test(lower)) return categoryEmojis.base64;
+  if (/uuid/.test(lower)) return categoryEmojis.uuid;
+  if (/hash|md5|sha/.test(lower)) return categoryEmojis.hash;
+  if (/url|encode|decode/.test(lower)) return categoryEmojis.url;
+  if (/regex/.test(lower)) return categoryEmojis.regex;
+  if (/password/.test(lower)) return categoryEmojis.pw;
+  if (/random|roll|dice|flip|coin/.test(lower)) return categoryEmojis.random;
+  if (/lorem/.test(lower)) return categoryEmojis.lorem;
+  if (/color|colour|hex|rgb/.test(lower)) return categoryEmojis.color;
+  if (/bmi|body mass/.test(lower)) return categoryEmojis.bmi;
+  if (/fuel|petrol|diesel|gas/.test(lower)) return categoryEmojis.fuel;
+  if (/cook|cup|tablespoon|teaspoon/.test(lower)) return categoryEmojis.cook;
+  if (/recipe|scale/.test(lower)) return categoryEmojis.recipe;
+  if (/loan|emi|mortgage|interest/.test(lower)) return categoryEmojis.loan;
+  return categoryEmojis.default;
+}
+
+function generateChatName(text) {
+  const emoji = getCategoryEmoji(text);
+  const truncated = text.length > 36 ? text.substring(0, 36) + '…' : text;
+  return emoji + ' ' + truncated;
+}
+
+// =================== RENDER CHAT LIST ===================
+function renderChatList() {
+  const list = document.getElementById('chatList');
+  list.innerHTML = '';
+  allChats.forEach(chat => {
+    const div = document.createElement('div');
+    div.className = 'sidebar-item' + (chat.id === activeChatId ? ' active' : '');
+    div.innerHTML = `
+      <span class="item-text">${escapeHtml(chat.name)}</span>
+      <button class="delete-btn" onclick="event.stopPropagation();deleteChat('${chat.id}')" title="Delete">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    `;
+    div.onclick = () => switchChat(chat.id);
+    list.appendChild(div);
+  });
+}
+
+// =================== CHAT OPERATIONS ===================
+function createNewChat(silent) {
+  const chat = {
+    id: 'chat_' + Date.now(),
+    name: '💬 New chat',
+    messages: [],
+    created: Date.now()
+  };
+  allChats.unshift(chat);
+  activeChatId = chat.id;
+  saveChats();
+  renderChatList();
+
+  document.getElementById('welcomeScreen').style.display = '';
+  document.getElementById('messagesContainer').style.display = 'none';
+  document.getElementById('messagesContainer').innerHTML = '';
+  document.getElementById('composerInput').value = '';
+  toggleSend();
+  setWelcomeMessage();
+  if (!silent) document.getElementById('composerInput').focus();
+}
+
+function switchChat(chatId) {
+  activeChatId = chatId;
+  renderChatList();
+  loadChat(chatId);
+  closeSidebarMobile();
+}
+
+function loadChat(chatId) {
+  const chat = allChats.find(c => c.id === chatId);
+  if (!chat) return;
+
+  const container = document.getElementById('messagesContainer');
+  container.innerHTML = '';
+
+  if (chat.messages.length === 0) {
+    document.getElementById('welcomeScreen').style.display = '';
+    container.style.display = 'none';
+    setWelcomeMessage();
+  } else {
+    document.getElementById('welcomeScreen').style.display = 'none';
+    container.style.display = 'block';
+
+    let lastDate = '';
+    chat.messages.forEach(msg => {
+      const msgDate = formatDateLabel(msg.timestamp);
+      if (msgDate !== lastDate) {
+        addDateDivider(msgDate);
+        lastDate = msgDate;
+      }
+      if (msg.type === 'user') {
+        addUserMessageDOM(msg.text, msg.timestamp);
+      } else {
+        addBotMessageDOM(msg.html, msg.timestamp);
+      }
+    });
+    scrollToBottom();
+  }
+}
+
+function deleteChat(chatId) {
+  allChats = allChats.filter(c => c.id !== chatId);
+  saveChats();
+  if (chatId === activeChatId) {
+    if (allChats.length > 0) {
+      switchChat(allChats[0].id);
+    } else {
+      createNewChat(true);
+    }
+  } else {
+    renderChatList();
+  }
+}
+
+// =================== TIMESTAMPS ===================
+function formatTime(ts) {
+  const d = new Date(ts);
+  let h = d.getHours();
+  const m = d.getMinutes().toString().padStart(2, '0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return h + ':' + m + ' ' + ampm;
+}
+
+function formatDateLabel(ts) {
+  const d = new Date(ts);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (d.toDateString() === today.toDateString()) return 'Today';
+  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+
+// =================== DOM HELPERS ===================
+function addDateDivider(label) {
+  const container = document.getElementById('messagesContainer');
+  const div = document.createElement('div');
+  div.className = 'date-divider';
+  div.innerHTML = '<span>' + label + '</span>';
+  container.appendChild(div);
+}
+
+function addUserMessageDOM(text, ts) {
+  const container = document.getElementById('messagesContainer');
+  const div = document.createElement('div');
+  div.className = 'message msg-user';
+  div.innerHTML = `
+    <div class="msg-user-inner">
+      <div class="msg-bubble">${escapeHtml(text)}</div>
+      <div class="msg-time">${formatTime(ts)}</div>
+    </div>`;
+  container.appendChild(div);
+}
+
+function addBotMessageDOM(html, ts) {
+  const container = document.getElementById('messagesContainer');
+  const div = document.createElement('div');
+  div.className = 'message msg-bot';
+  const copyId = 'copy-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+  div.innerHTML = `
+    <div class="msg-content">${html}</div>
+    <div class="msg-meta">
+      <div class="msg-time">${formatTime(ts)}</div>
+      <div class="water-badge"><i class="fa-solid fa-droplet"></i> ~${WATER_PER_QUERY_ML}ml saved · No AI used</div>
+      <button class="copy-result-btn" id="${copyId}" onclick="copyBotMessage(this)" title="Copy to clipboard" style="
+        background: none;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.15s;
+        position: relative;
+      " onmouseenter="this.style.color='var(--text-primary)';this.style.borderColor='var(--border-hover)'" onmouseleave="this.style.color='var(--text-muted)';this.style.borderColor='var(--border)'">
+        <i class="fa-regular fa-clipboard"></i>
+      </button>
+    </div>`;
+  container.appendChild(div);
+}
+
+// =================== COPY BUTTON ===================
+function copyBotMessage(btn) {
+  const msgBot = btn.closest('.msg-bot');
+  if (!msgBot) return;
+  const contentEl = msgBot.querySelector('.msg-content');
+  if (!contentEl) return;
+
+  // Get text content (strips HTML)
+  const text = contentEl.innerText || contentEl.textContent;
+
+  navigator.clipboard.writeText(text).then(() => {
+    // Show "Copied!" tooltip
+    const icon = btn.querySelector('i');
+    const origClass = icon.className;
+    icon.className = 'fa-solid fa-check';
+    btn.style.color = 'var(--accent)';
+    btn.style.borderColor = 'var(--accent)';
+
+    const tooltip = document.createElement('span');
+    tooltip.textContent = 'Copied!';
+    tooltip.style.cssText = 'position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--bg-active);color:var(--accent);font-size:10px;padding:2px 8px;border-radius:4px;white-space:nowrap;pointer-events:none;animation:msgIn 0.2s ease-out;';
+    btn.appendChild(tooltip);
+
+    setTimeout(() => {
+      icon.className = origClass;
+      btn.style.color = 'var(--text-muted)';
+      btn.style.borderColor = 'var(--border)';
+      if (tooltip.parentNode) tooltip.remove();
+    }, 1500);
+  }).catch(() => {
+    // Fallback: select text
+    const range = document.createRange();
+    range.selectNodeContents(contentEl);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    try { document.execCommand('copy'); } catch(e) {}
+    sel.removeAllRanges();
+  });
+}
+
+let loadingCounter = 0;
+function showLoading() {
+  const id = 'loading-' + (++loadingCounter);
+  const container = document.getElementById('messagesContainer');
+  const div = document.createElement('div');
+  div.id = id;
+  div.className = 'loading-indicator';
+  const msg = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+  div.innerHTML = `
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+    <div class="loading-text">${msg}</div>`;
+  container.appendChild(div);
+  scrollToBottom();
+  return id;
+}
+function removeLoading(id) { const el = document.getElementById(id); if (el) el.remove(); }
+function scrollToBottom() { const a = document.getElementById('chatArea'); requestAnimationFrame(() => a.scrollTop = a.scrollHeight); }
+function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+// =================== SEND ===================
+function sendMessage(text) {
+  if (!text.trim()) return;
+  const chat = getActiveChat();
+  if (!chat) return;
+
+  const now = Date.now();
+
+  // Show messages view
+  document.getElementById('welcomeScreen').style.display = 'none';
+  document.getElementById('messagesContainer').style.display = 'block';
+
+  // Date divider check
+  const lastMsg = chat.messages[chat.messages.length - 1];
+  const todayLabel = formatDateLabel(now);
+  if (!lastMsg || formatDateLabel(lastMsg.timestamp) !== todayLabel) {
+    addDateDivider(todayLabel);
+  }
+
+  // Add user message
+  chat.messages.push({ type: 'user', text: text, timestamp: now });
+  addUserMessageDOM(text, now);
+
+  // Auto-name chat on first message
+  if (chat.messages.length === 1) {
+    chat.name = generateChatName(text);
+    renderChatList();
+  }
+
+  // Clear composer
+  const input = document.getElementById('composerInput');
+  input.value = '';
+  autoGrow(input);
+  toggleSend();
+
+  // Show loading
+  const loadingId = showLoading();
+  saveChats();
+
+  // Simulate response delay
+  setTimeout(() => {
+    removeLoading(loadingId);
+    const respTime = Date.now();
+
+    // Route through NLP parser
+    const result = parseAndRoute(text);
+
+    if (result && result.type === 'help') {
+      openModal();
+      const helpHtml = "I've opened the full tool catalog for you! Take a look at everything I can do — all without AI. 💧";
+      chat.messages.push({ type: 'bot', html: helpHtml, timestamp: respTime });
+      addBotMessageDOM(helpHtml, respTime);
+      addWaterSaved();
+      saveChats();
+      scrollToBottom();
+      return;
+    }
+
+    if (result && result.html) {
+      chat.messages.push({ type: 'bot', html: result.html, timestamp: respTime });
+      addBotMessageDOM(result.html, respTime);
+      addWaterSaved();
+      saveChats();
+      scrollToBottom();
+      return;
+    }
+
+    // Fallback
+    const fallback = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+    const responseHtml = fallback;
+    chat.messages.push({ type: 'bot', html: responseHtml, timestamp: respTime });
+    addBotMessageDOM(responseHtml, respTime);
+    addWaterSaved();
+    saveChats();
+    scrollToBottom();
+
+  }, 700 + Math.random() * 600);
+}
+
+function sendFromComposer() {
+  sendMessage(document.getElementById('composerInput').value);
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    if (document.getElementById('composerInput').value.trim()) sendFromComposer();
+  }
+}
+function autoGrow(el) { el.style.height = '22px'; el.style.height = Math.min(el.scrollHeight, 140) + 'px'; }
+function toggleSend() { document.getElementById('sendBtn').disabled = !document.getElementById('composerInput').value.trim(); }
+
+// =================== WATER ===================
+function addWaterSaved() {
+  sessionWaterMl += WATER_PER_QUERY_ML;
+  document.getElementById('sessionWater').classList.add('visible');
+  document.getElementById('sessionWaterAmount').textContent = '~' + sessionWaterMl + ' ml saved';
+}
+
+// =================== WELCOME ===================
+function setWelcomeMessage() {
+  const msg = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+  document.getElementById('welcomeTitle').innerText = msg.title;
+  document.getElementById('welcomeSub').innerText = msg.sub;
+}
+
+// =================== MODAL ===================
+function openModal() { document.getElementById('modalOverlay').classList.add('active'); }
+function closeModal(e) { if (e.target === document.getElementById('modalOverlay')) closeModalDirect(); }
+function closeModalDirect() { document.getElementById('modalOverlay').classList.remove('active'); }
+
+// =================== MOBILE SIDEBAR ===================
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+function closeSidebarMobile() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('active');
+}
+
+
+// =================== SETTINGS ===================
+var SETTINGS_KEY = 'notgpt_settings';
+
+function loadSettings() {
+  try {
+    var data = localStorage.getItem(SETTINGS_KEY);
+    return data ? JSON.parse(data) : { chatLimit: 25, shareChats: false };
+  } catch(e) { return { chatLimit: 25, shareChats: false }; }
+}
+
+function saveSettings() {
+  var settings = {
+    chatLimit: parseInt(document.getElementById('chatLimitSlider').value),
+    shareChats: document.getElementById('shareChatsToggle').checked
+  };
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch(e) {}
+}
+
+function openSettings() {
+  var settings = loadSettings();
+  document.getElementById('chatLimitSlider').value = settings.chatLimit;
+  document.getElementById('chatLimitVal').textContent = settings.chatLimit;
+  document.getElementById('shareChatsToggle').checked = settings.shareChats;
+  document.getElementById('settingsOverlay').classList.add('active');
+}
+
+function closeSettings(e) { if (e.target === document.getElementById('settingsOverlay')) closeSettingsDirect(); }
+function closeSettingsDirect() { document.getElementById('settingsOverlay').classList.remove('active'); }
+function updateChatLimitLabel(val) { document.getElementById('chatLimitVal').textContent = val; }
+
+// =================== BOOT ===================
+init();
+
+</script>
+</body>
+</html>
