@@ -470,6 +470,7 @@ function logQuery(query, toolMatched, matched) {
     fetch(SHEETS_URL, {
       method: 'POST',
       body: JSON.stringify({
+        _t: 'notgpt_v2',
         type: 'failed_query',
         query: query,
         tool: toolMatched || 'unmatched',
@@ -485,6 +486,7 @@ function sendFeedback(message) {
   fetch(SHEETS_URL, {
     method: 'POST',
     body: JSON.stringify({
+      _t: 'notgpt_v2',
       type: 'feedback',
       message: message.trim()
     })
@@ -501,6 +503,7 @@ function cleanupOldFailedChats() {
     fetch(SHEETS_URL, {
       method: 'POST',
       body: JSON.stringify({
+        _t: 'notgpt_v2',
         type: 'cleanup',
         maxAgeDays: 7
       })

@@ -117,7 +117,7 @@
   <div class="modal" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeModalDirect()">&times;</button>
     <h2>What can I do?</h2>
-    <p class="modal-sub">NotGPT uses math, not AI. All of this - without a single drop of AI.</p>
+    <p class="modal-sub">Simple tools that run on math, not AI. Everything below works right in your browser - no servers, no AI, no data leaving your device.</p>
     <div class="modal-category"><h3><i class="fa-solid fa-calculator"></i> Calculators</h3><div class="modal-category-items"><span class="modal-tag">Percentage</span><span class="modal-tag">Arithmetic</span><span class="modal-tag">Tip calculator</span><span class="modal-tag">Discount</span><span class="modal-tag">Tax / GST / VAT</span><span class="modal-tag">Random numbers</span></div></div>
     <div class="modal-category"><h3><i class="fa-solid fa-calendar-days"></i> Date & Time</h3><div class="modal-category-items"><span class="modal-tag">Date difference</span></div></div>
     <div class="modal-category"><h3><i class="fa-solid fa-arrows-rotate"></i> Unit Conversion</h3><div class="modal-category-items"><span class="modal-tag">Length</span><span class="modal-tag">Weight</span><span class="modal-tag">Temperature</span><span class="modal-tag">Area</span><span class="modal-tag">Volume</span><span class="modal-tag">Speed</span><span class="modal-tag">Data / Storage</span><span class="modal-tag">Cooking</span><span class="modal-tag">Time</span></div></div>
@@ -170,7 +170,7 @@
         <input type="checkbox" id="shareChatsToggle" onchange="saveSettings()">
         <div>
           <span class="settings-checkbox-label">Share failed chats with developer</span>
-          <span class="settings-hint">Failed chats will be shared with the developer to improve the tool. Off by default. Once turned on, timestamp and chat text will be collected - no user details are collected anywhere. All stored chats (only failed ones) will be auto-deleted in 7 days.</span>
+          <span class="settings-hint">Failed chats will be shared with the developer to improve the tool. Off by default. Once turned on, timestamp and chat text will be collected - no user details are collected anywhere. All those stored chats will be auto-deleted in 7 days.</span>
         </div>
       </label>
     </div>
@@ -182,20 +182,28 @@
       <div class="settings-label">FAQ</div>
       <div class="settings-faq">
         <details class="faq-item">
-          <summary>Who am I?</summary>
-          <p class="faq-answer">Coming soon.</p>
+          <summary>Who made this?</summary>
+          <p class="faq-answer">Just a regular guy who believes software should be either free or paid. Not "give me your data and I'll give you my product." (And yes, I hate subscriptions too.)</p>
         </details>
         <details class="faq-item">
           <summary>Why this tool?</summary>
-          <p class="faq-answer">Coming soon.</p>
+          <p class="faq-answer">Coz I thought - do we really need to evaporate litres of water for basic calculations? Why can't math just serve the purpose? Why can't user privacy be the default? And NotGPT was born. Still in its baby steps. Tons of features planned (before I ran out of tea).</p>
         </details>
         <details class="faq-item">
           <summary>Do you collect any data?</summary>
-          <p class="faq-answer">Coming soon.</p>
+          <p class="faq-answer">Only if you opt in. If you enable "Share failed chats" in settings, the timestamp and chat text of unmatched queries are collected - no user details, no IP, no cookies. Everything auto-deletes in 7 days. That's it.</p>
         </details>
         <details class="faq-item">
           <summary>Is this open source?</summary>
-          <p class="faq-answer">Coming soon.</p>
+          <p class="faq-answer">Yes! The entire codebase is on <a href="https://github.com/prophecy10/notgpt" target="_blank" rel="noopener">GitHub</a>. MIT licensed. Fork it, break it, improve it.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Why not just use ChatGPT for everything?</summary>
+          <p class="faq-answer">Great question. LLM-based tools are incredibly useful for tasks that need understanding, reasoning, or creativity. NotGPT isn't replacing them.<br><br>The idea is simply that <strong>not every task needs an LLM</strong>. Calculations, conversions, formatting, generators - these have clear, predefined logic. A dedicated tool can handle them faster, predictably, and without sending your input to a server.<br><br>This isn't "AI is bad." It's about having more choices.<br><br><strong>Use AI when you need intelligence. Use simple software when simple software is enough.</strong></p>
+        </details>
+        <details class="faq-item">
+          <summary>How can I contribute?</summary>
+          <p class="faq-answer">Two ways:<br>1. Submit a PR on <a href="https://github.com/prophecy10/notgpt" target="_blank" rel="noopener">GitHub</a> - add a tool, fix a bug, improve the NLP.<br>2. Buy me a tea - the option is in the sidebar, right next to Settings. &#9749;</p>
         </details>
       </div>
     </div>
@@ -293,6 +301,15 @@
 function openTeaModal() { document.getElementById('teaOverlay').classList.add('active'); }
 function closeTeaModal(e) { if (e.target === document.getElementById('teaOverlay')) closeTeaModalDirect(); }
 function closeTeaModalDirect() { document.getElementById('teaOverlay').classList.remove('active'); }
+
+// Esc key closes any open modal/overlay
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    if (document.getElementById('teaOverlay').classList.contains('active')) closeTeaModalDirect();
+    else if (document.getElementById('settingsOverlay').classList.contains('active')) closeSettingsDirect();
+    else if (document.getElementById('modalOverlay').classList.contains('active')) closeModalDirect();
+  }
+});
 </script>
 
 </body>
