@@ -65,7 +65,9 @@ function tryDateDifference(lower, original) {
   }
 
   // "how many days between X and Y"
-  const betweenMatch = lower.match(/(?:how\s+many\s+)?days?\s*between\s+(.+?)\s+and\s+(.+?)(?:\?|$)/);
+  // Also handles: "no of days between X to Y", "number of days from X to Y",
+  //               "days between X and Y", "days from X to Y"
+  const betweenMatch = lower.match(/(?:(?:how\s+many|no\.?\s*(?:of)?|number\s+of)\s+)?days?\s*(?:between|from)\s+(.+?)\s+(?:and|to)\s+(.+?)(?:\?|$)/);
   if (betweenMatch) {
     let dateStr1 = betweenMatch[1].trim();
     let dateStr2 = betweenMatch[2].trim();
@@ -98,7 +100,7 @@ function tryDateDifference(lower, original) {
 }
 
 function parseDateFuzzy(str) {
-  str = str.replace(/[,\.]+/g, ' ').replace(/\s+/g, ' ').trim();
+  str = str.replace(/[,\.]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/\u2013|\u2014/g, '-');
   const monthNames = {
     jan: 0, january: 0, feb: 1, february: 1, mar: 2, march: 2,
     apr: 3, april: 3, may: 4, jun: 5, june: 5,
@@ -118,6 +120,18 @@ function parseDateFuzzy(str) {
     return new Date(parseInt(m[3]), monthNames[m[2].toLowerCase()], parseInt(m[1]));
   }
 
+  // "22-nov-1992", "22-november-1992", "1-jan-2025" (day-month-year with dashes)
+  m = str.match(/^(\d{1,2})-(\w+)-(\d{4})$/i);
+  if (m && monthNames[m[2].toLowerCase()] !== undefined) {
+    return new Date(parseInt(m[3]), monthNames[m[2].toLowerCase()], parseInt(m[1]));
+  }
+
+  // "nov-22-1992", "november-22-1992" (month-day-year with dashes)
+  m = str.match(/^(\w+)-(\d{1,2})-(\d{4})$/i);
+  if (m && monthNames[m[1].toLowerCase()] !== undefined) {
+    return new Date(parseInt(m[3]), monthNames[m[1].toLowerCase()], parseInt(m[2]));
+  }
+
   // "Dec 31 2026", "December 31 2026"
   m = str.match(/^(\w+)\s+(\d{1,2})(?:\s+(\d{4}))?$/i);
   if (m && monthNames[m[1].toLowerCase()] !== undefined) {
@@ -131,6 +145,19 @@ function parseDateFuzzy(str) {
 
   m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (m) return new Date(parseInt(m[3]), parseInt(m[1]) - 1, parseInt(m[2]));
+
+  // "22/11/1992" (DD/MM/YYYY - assume DD/MM for international format when day > 12)
+  // Already handled above as MM/DD — but add DD-MM-YYYY with dashes
+  m = str.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (m) {
+    var a = parseInt(m[1]), b = parseInt(m[2]), y = parseInt(m[3]);
+    // If first number > 12, it must be day (DD-MM-YYYY)
+    if (a > 12) return new Date(y, b - 1, a);
+    // If second number > 12, it must be day (MM-DD-YYYY)
+    if (b > 12) return new Date(y, a - 1, b);
+    // Ambiguous (both <= 12) — assume MM-DD-YYYY (US convention)
+    return new Date(y, a - 1, b);
+  }
 
   return null;
 }

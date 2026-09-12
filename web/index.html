@@ -46,9 +46,9 @@
       <i class="fa-solid fa-gear"></i>
       Settings
     </div>
-    <div class="sidebar-footer-btn" onclick="window.open('https://ko-fi.com/notgpt','_blank')">
+    <div class="sidebar-footer-btn" onclick="openTeaModal()">
       <i class="fa-solid fa-mug-hot"></i>
-      Support on Ko-fi
+      Buy me a tea
     </div>
   </div>
 </aside>
@@ -76,7 +76,7 @@
       <div class="suggestion-chips">
         <div class="chip" onclick="sendMessage('What is 18% of 4500?')">What is 18% of 4500?</div>
         <div class="chip" onclick="sendMessage('Convert 5 feet 8 inches to cm')">5ft 8in to cm</div>
-        <div class="chip" onclick="sendMessage('Generate a random number between 1 and 100')">Random 1–100</div>
+        <div class="chip" onclick="sendMessage('Generate a random number between 1 and 100')">Random 1&#8211;100</div>
         <div class="chip" onclick="sendMessage('How many days until December 31 2026?')">Days until New Year</div>
         <div class="chip" onclick="sendMessage('What can you do?')">What can you do?</div>
       </div>
@@ -118,13 +118,16 @@
     <button class="modal-close" onclick="closeModalDirect()">&times;</button>
     <h2>What can I do?</h2>
     <p class="modal-sub">NotGPT uses math, not AI. All of this - without a single drop of AI.</p>
-    <div class="modal-category"><h3><i class="fa-solid fa-calculator"></i> Calculators</h3><div class="modal-category-items"><span class="modal-tag">Percentage</span><span class="modal-tag">Arithmetic</span><span class="modal-tag">Tip</span><span class="modal-tag">Discount</span><span class="modal-tag">Tax</span><span class="modal-tag">Compound interest</span><span class="modal-tag">EMI</span><span class="modal-tag">Average</span><span class="modal-tag">Random numbers</span></div></div>
-    <div class="modal-category"><h3><i class="fa-solid fa-calendar-days"></i> Date & Time</h3><div class="modal-category-items"><span class="modal-tag">Age calculator</span><span class="modal-tag">Date difference</span><span class="modal-tag">Add/subtract days</span><span class="modal-tag">Day of the week</span><span class="modal-tag">Timezone conversion</span><span class="modal-tag">Countdown</span></div></div>
-    <div class="modal-category"><h3><i class="fa-solid fa-arrows-rotate"></i> Unit Conversion</h3><div class="modal-category-items"><span class="modal-tag">Length</span><span class="modal-tag">Weight</span><span class="modal-tag">Temperature</span><span class="modal-tag">Area</span><span class="modal-tag">Volume</span><span class="modal-tag">Speed</span><span class="modal-tag">Data/storage</span></div></div>
-    <div class="modal-category"><h3><i class="fa-solid fa-font"></i> Text Utilities</h3><div class="modal-category-items"><span class="modal-tag">Word count</span><span class="modal-tag">Character count</span><span class="modal-tag">Change case</span><span class="modal-tag">Remove duplicates</span><span class="modal-tag">Sort lines</span><span class="modal-tag">Find & replace</span><span class="modal-tag">Extract emails/URLs</span></div></div>
-    <div class="modal-category"><h3><i class="fa-solid fa-code"></i> Developer Tools</h3><div class="modal-category-items"><span class="modal-tag">JSON formatter</span><span class="modal-tag">Base64 encode/decode</span><span class="modal-tag">URL encode/decode</span><span class="modal-tag">UUID generator</span><span class="modal-tag">Hash generation</span><span class="modal-tag">Color conversion</span><span class="modal-tag">Regex tester</span></div></div>
-    <div class="modal-category"><h3><i class="fa-solid fa-dice"></i> Generators</h3><div class="modal-category-items"><span class="modal-tag">Password</span><span class="modal-tag">UUID</span><span class="modal-tag">Random number</span><span class="modal-tag">Random choice</span><span class="modal-tag">Lorem ipsum</span><span class="modal-tag">Color palette</span></div></div>
-    <div class="modal-category"><h3><i class="fa-solid fa-heart-pulse"></i> Everyday</h3><div class="modal-category-items"><span class="modal-tag">BMI</span><span class="modal-tag">Fuel cost</span><span class="modal-tag">Cooking conversions</span><span class="modal-tag">Recipe scaling</span><span class="modal-tag">Electricity cost</span><span class="modal-tag">Loan/mortgage</span><span class="modal-tag">Shopping discount</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-calculator"></i> Calculators</h3><div class="modal-category-items"><span class="modal-tag">Percentage</span><span class="modal-tag">Arithmetic</span><span class="modal-tag">Tip calculator</span><span class="modal-tag">Discount</span><span class="modal-tag">Tax / GST / VAT</span><span class="modal-tag">Random numbers</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-calendar-days"></i> Date & Time</h3><div class="modal-category-items"><span class="modal-tag">Date difference</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-arrows-rotate"></i> Unit Conversion</h3><div class="modal-category-items"><span class="modal-tag">Length</span><span class="modal-tag">Weight</span><span class="modal-tag">Temperature</span><span class="modal-tag">Area</span><span class="modal-tag">Volume</span><span class="modal-tag">Speed</span><span class="modal-tag">Data / Storage</span><span class="modal-tag">Cooking</span><span class="modal-tag">Time</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-font"></i> Text Utilities</h3><div class="modal-category-items"><span class="modal-tag">Word count</span><span class="modal-tag">Character count</span><span class="modal-tag">Change case</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-code"></i> Developer Tools</h3><div class="modal-category-items"><span class="modal-tag">JSON formatter</span><span class="modal-tag">Base64 encode/decode</span><span class="modal-tag">URL encode/decode</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-dice"></i> Generators</h3><div class="modal-category-items"><span class="modal-tag">Password</span><span class="modal-tag">UUID</span><span class="modal-tag">Random number</span><span class="modal-tag">Lorem ipsum</span></div></div>
+    <div class="modal-category"><h3><i class="fa-solid fa-heart-pulse"></i> Everyday</h3><div class="modal-category-items"><span class="modal-tag">BMI</span></div></div>
+    <div class="modal-divider"></div>
+    <h3 class="coming-soon-heading"><i class="fa-solid fa-clock"></i> Coming Soon</h3>
+    <div class="coming-soon-items"><span class="modal-tag coming-soon">Age calculator</span><span class="modal-tag coming-soon">Add/subtract days</span><span class="modal-tag coming-soon">Day of the week</span><span class="modal-tag coming-soon">Timezone conversion</span><span class="modal-tag coming-soon">Countdown</span><span class="modal-tag coming-soon">Compound interest</span><span class="modal-tag coming-soon">EMI / Loan</span><span class="modal-tag coming-soon">Average / Stats</span><span class="modal-tag coming-soon">GCD / LCM</span><span class="modal-tag coming-soon">Remove duplicates</span><span class="modal-tag coming-soon">Sort lines</span><span class="modal-tag coming-soon">Find & replace</span><span class="modal-tag coming-soon">Extract emails/URLs</span><span class="modal-tag coming-soon">Hash generation</span><span class="modal-tag coming-soon">Color conversion</span><span class="modal-tag coming-soon">Regex tester</span><span class="modal-tag coming-soon">Random choice</span><span class="modal-tag coming-soon">Fuel cost</span><span class="modal-tag coming-soon">Cooking conversions</span><span class="modal-tag coming-soon">Recipe scaling</span><span class="modal-tag coming-soon">Electricity cost</span></div>
   </div>
 </div>
 
@@ -147,7 +150,6 @@
       </div>
     </div>
 
-    <!-- Divider -->
     <div class="settings-divider"></div>
 
     <!-- Share feedback -->
@@ -160,29 +162,65 @@
       </button>
     </div>
 
-    <!-- Divider -->
     <div class="settings-divider"></div>
 
-    <!-- Share chats with dev -->
+    <!-- Share failed chats with dev -->
     <div class="settings-group">
       <label class="settings-checkbox-row" for="shareChatsToggle">
         <input type="checkbox" id="shareChatsToggle" onchange="saveSettings()">
         <div>
-          <span class="settings-checkbox-label">Share chats with developer</span>
-          <span class="settings-hint">Whatever you type in the chatbox will be shared with the developer to improve the tool. This helps us understand common searches and improve utility coverage. Off by default.</span>
+          <span class="settings-checkbox-label">Share failed chats with developer</span>
+          <span class="settings-hint">Failed chats will be shared with the developer to improve the tool. Off by default. Once turned on, timestamp and chat text will be collected - no user details are collected anywhere. All stored chats (only failed ones) will be auto-deleted in 7 days.</span>
         </div>
       </label>
     </div>
 
-    <!-- Divider -->
     <div class="settings-divider"></div>
 
-    <!-- Terms -->
+    <!-- FAQ -->
+    <div class="settings-group">
+      <div class="settings-label">FAQ</div>
+      <div class="settings-faq">
+        <details class="faq-item">
+          <summary>Who am I?</summary>
+          <p class="faq-answer">Coming soon.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Why this tool?</summary>
+          <p class="faq-answer">Coming soon.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Do you collect any data?</summary>
+          <p class="faq-answer">Coming soon.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Is this open source?</summary>
+          <p class="faq-answer">Coming soon.</p>
+        </details>
+      </div>
+    </div>
+
+    <div class="settings-divider"></div>
+
+    <!-- Credits -->
+    <div class="settings-group">
+      <div class="settings-label">Credits</div>
+      <div class="settings-credits">
+        <p>NLP powered by <a href="https://winkjs.org/wink-nlp/" target="_blank" rel="noopener">winkNLP</a> - an open source NLP library by GRAYPE Systems.</p>
+        <p style="margin-top:6px;color:var(--text-muted);font-size:11px;">Want to contribute? <a href="https://github.com/prophecy10/notgpt" target="_blank" rel="noopener">PRs welcome on GitHub.</a></p>
+      </div>
+    </div>
+
+    <div class="settings-divider"></div>
+
+    <!-- Terms & Conditions -->
     <div class="settings-group">
       <div class="settings-label">Terms & Conditions</div>
       <div class="settings-terms">
-        <p>Haven't really thought of keeping terms and conditions for a simple tool. But <strong>don't do anything illegal</strong> with it. What's illegal in your country stays illegal here. Simple as that.</p>
-        <p style="margin-top:8px; color: var(--text-muted);">Also: NotGPT is <strong>not affiliated with OpenAI or ChatGPT</strong>. "GPT" is a trademark of OpenAI. We just think not everything needs it. 🤷</p>
+        <p>NotGPT is a collection of simple tools designed to get things done without unnecessarily using AI.</p>
+        <p>Please don't use NotGPT for anything illegal. What's illegal in your country is illegal here too. Simple as that.</p>
+        <p><strong>NotGPT is not affiliated with, endorsed by, sponsored by, or otherwise associated with OpenAI or ChatGPT.</strong> The name "NotGPT" is intended to communicate that these tools do not require GPT/LLM-based AI.</p>
+        <p>By using this website, you agree to use it responsibly and in accordance with applicable laws.</p>
       </div>
     </div>
 
@@ -192,6 +230,23 @@
         Save & close
       </button>
     </div>
+  </div>
+</div>
+
+
+<!-- TEA MODAL -->
+<div class="modal-overlay" id="teaOverlay" onclick="closeTeaModal(event)">
+  <div class="modal tea-modal" onclick="event.stopPropagation()" style="max-width:340px;text-align:center;">
+    <button class="modal-close" onclick="closeTeaModalDirect()">&times;</button>
+    <h2 style="margin-bottom:4px;">Buy me a tea <span style="font-size:18px;">&#9749;</span></h2>
+    <p class="modal-sub" style="margin-bottom:16px;">If NotGPT saved you a few seconds (and a few ml of water), consider buying me a tea!</p>
+    <div style="margin-bottom:16px;">
+      <img src="assets/upi-qr.png" alt="UPI QR Code" style="width:200px;height:200px;border-radius:12px;border:1px solid var(--border);">
+    </div>
+    <a href="upi://pay?pa=prophecy@upi&am=20" class="tea-pay-btn">
+      Tap to send &#8377;20 via UPI
+    </a>
+    <p style="font-size:10px;color:var(--text-muted);margin-top:12px;">Scan the QR or tap the button to open your UPI app.</p>
   </div>
 </div>
 
@@ -208,11 +263,37 @@
 <script src="js/tools/arithmetic.js"></script>
 <script src="js/tools/bmi.js"></script>
 
+<!-- NLP Preprocessing (typo correction, word-to-number, etc.) -->
+<script src="js/nlp-preprocess.js"></script>
+
+<!-- New Tools -->
+<script src="js/tools/tip-calculator.js"></script>
+<script src="js/tools/discount.js"></script>
+<script src="js/tools/tax-calculator.js"></script>
+<script src="js/tools/password-generator.js"></script>
+<script src="js/tools/base64.js"></script>
+<script src="js/tools/url-encode.js"></script>
+<script src="js/tools/uuid-generator.js"></script>
+<script src="js/tools/lorem-ipsum.js"></script>
+
 <!-- Parser (depends on tools being loaded) -->
 <script src="js/parser.js"></script>
 
+<!-- wink-nlp bundle (created via browserify) -->
+<script src="js/wink-bundle.js"></script>
+
+<!-- wink-nlp integration layer -->
+<script src="js/wink-integration.js"></script>
+
 <!-- Core app (depends on parser + tools) -->
 <script src="js/app.js"></script>
+
+<script>
+// Tea modal
+function openTeaModal() { document.getElementById('teaOverlay').classList.add('active'); }
+function closeTeaModal(e) { if (e.target === document.getElementById('teaOverlay')) closeTeaModalDirect(); }
+function closeTeaModalDirect() { document.getElementById('teaOverlay').classList.remove('active'); }
+</script>
 
 </body>
 </html>

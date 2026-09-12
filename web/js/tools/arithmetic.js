@@ -8,6 +8,10 @@ function tryArithmetic(lower, original) {
   const mathSignals = /(\d\s*[\+\-\*\/\^%×÷]\s*\d|plus|minus|times|divided|multiplied|mod(?:ulo)?|square\s*root|sqrt|power|raise|\bsum\b|\bproduct\b)/i;
   if (!mathSignals.test(lower)) return null;
 
+  // ---- Reject if this looks like a date query (don't steal from date-diff) ----
+  if (/\b(?:days?|between|from|until|since)\b/i.test(lower) && /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|today|tomorrow|yesterday)\b/i.test(lower)) return null;
+
+
   // ---- Normalise the input into a math-ready string ----
   let expr = original.trim();
 

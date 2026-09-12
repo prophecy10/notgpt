@@ -135,8 +135,10 @@ const fallbackResponses = [
 // =================== NLP PARSER ENGINE ===================
 
 function parseAndRoute(input) {
-  const text = input.trim();
-  const lower = text.toLowerCase();
+  // NLP preprocessing: clean typos, convert word-numbers, normalize synonyms
+  var cleaned = (typeof preprocessInput === 'function') ? preprocessInput(input) : input;
+  var text = cleaned.trim();
+  var lower = text.toLowerCase();
 
   // 1. Check for help/tools triggers
   if (/^(what can you do|help|tools|\/tools|list tools|what do you support|what do you do|show me what you can do|capabilities|features)\??$/i.test(lower)) {
@@ -144,7 +146,7 @@ function parseAndRoute(input) {
   }
 
   // 2. Try each utility parser in order
-  let result;
+  var result;
 
   result = tryPercentage(lower, text);
   if (result) return result;
@@ -175,6 +177,32 @@ function parseAndRoute(input) {
   if (result) return result;
 
   result = tryBMI(lower, text);
+  if (result) return result;
+
+  // --- New tools ---
+
+  result = tryTipCalculator(lower, text);
+  if (result) return result;
+
+  result = tryDiscount(lower, text);
+  if (result) return result;
+
+  result = tryTaxCalculator(lower, text);
+  if (result) return result;
+
+  result = tryPasswordGenerator(lower, text);
+  if (result) return result;
+
+  result = tryBase64(lower, text);
+  if (result) return result;
+
+  result = tryUrlEncode(lower, text);
+  if (result) return result;
+
+  result = tryUuidGenerator(lower, text);
+  if (result) return result;
+
+  result = tryLoremIpsum(lower, text);
   if (result) return result;
 
   // No match → fallback

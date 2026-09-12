@@ -33,6 +33,7 @@ function init() {
   }
   setWelcomeMessage();
   document.getElementById('composerInput').focus();
+  cleanupOldFailedChats();
 }
 
 // =================== CHAT STORAGE ===================
@@ -80,7 +81,7 @@ function renderChatList() {
 function createNewChat(silent) {
   const chat = {
     id: 'chat_' + Date.now(),
-    name: '💬 New chat',
+    name: '\ud83d\udcac New chat',
     messages: [],
     created: Date.now()
   };
@@ -321,12 +322,12 @@ function sendMessage(text) {
     removeLoading(loadingId);
     const respTime = Date.now();
 
-    // Route through NLP parser
-    const result = parseAndRoute(text);
+    // Route through NLP parser (preprocessing is handled inside parseAndRouteEnhanced)
+    var result = parseAndRoute(text);
 
     if (result && result.type === 'help') {
       openModal();
-      const helpHtml = "I've opened the full tool catalog for you! Take a look at everything I can do - all without AI. 💧";
+      const helpHtml = "I've opened the full tool catalog for you! Take a look at everything I can do - all without AI. \ud83d\udca7";
       logQuery(text, 'help', true);
       chat.messages.push({ type: 'bot', html: helpHtml, timestamp: respTime });
       addBotMessageDOM(helpHtml, respTime);
@@ -435,14 +436,14 @@ var SETTINGS_KEY = 'notgpt_settings';
 function loadSettings() {
   try {
     var data = localStorage.getItem(SETTINGS_KEY);
-    return data ? JSON.parse(data) : { chatLimit: 25, shareChats: false };
-  } catch(e) { return { chatLimit: 25, shareChats: false }; }
+    return data ? JSON.parse(data) : { chatLimit: 25, shareFailedChats: false };
+  } catch(e) { return { chatLimit: 25, shareFailedChats: false }; }
 }
 
 function saveSettings() {
   var settings = {
     chatLimit: parseInt(document.getElementById('chatLimitSlider').value),
-    shareChats: document.getElementById('shareChatsToggle').checked
+    shareFailedChats: document.getElementById('shareChatsToggle').checked
   };
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch(e) {}
 }
@@ -451,7 +452,7 @@ function openSettings() {
   var settings = loadSettings();
   document.getElementById('chatLimitSlider').value = settings.chatLimit;
   document.getElementById('chatLimitVal').textContent = settings.chatLimit;
-  document.getElementById('shareChatsToggle').checked = settings.shareChats;
+  document.getElementById('shareChatsToggle').checked = settings.shareFailedChats;
   document.getElementById('settingsOverlay').classList.add('active');
 }
 
@@ -463,14 +464,17 @@ function updateChatLimitLabel(val) { document.getElementById('chatLimitVal').tex
 function logQuery(query, toolMatched, matched) {
   try {
     var settings = loadSettings();
-    if (!settings.shareChats) return;
+    if (!settings.shareFailedChats) return;
+    // Only log failed/unmatched queries
+    if (matched) return;
     fetch(SHEETS_URL, {
       method: 'POST',
       body: JSON.stringify({
-        type: 'query',
+        type: 'failed_query',
         query: query,
-        tool: toolMatched || 'fallback',
-        matched: matched ? 'yes' : 'no'
+        tool: toolMatched || 'unmatched',
+        matched: 'no',
+        timestamp: new Date().toISOString()
       })
     }).catch(function() {});
   } catch(e) {}
@@ -485,10 +489,23 @@ function sendFeedback(message) {
       message: message.trim()
     })
   }).then(function() {
-    alert('Thank you for your feedback! 🙏');
+    alert('Thank you for your feedback! \ud83d\ude4f');
   }).catch(function() {
     alert('Could not send feedback. Please try again.');
   });
+}
+
+// =================== AUTO-CLEANUP ===================
+function cleanupOldFailedChats() {
+  try {
+    fetch(SHEETS_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        type: 'cleanup',
+        maxAgeDays: 7
+      })
+    }).catch(function() {});
+  } catch(e) {}
 }
 
 // =================== BOOT ===================

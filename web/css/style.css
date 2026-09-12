@@ -738,3 +738,107 @@ body {
   animation: msgIn 0.3s ease-out;
 }
 .water-badge-float i { font-size: 9px; }
+
+/* =================== FAQ SECTION =================== */
+.settings-faq {
+  margin-top: 4px;
+}
+.faq-item {
+  border-bottom: 1px solid var(--border);
+  padding: 0;
+}
+.faq-item:last-child {
+  border-bottom: none;
+}
+.faq-item summary {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  padding: 10px 0;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: '+';
+  font-size: 16px;
+  color: var(--text-muted);
+  font-weight: 300;
+  transition: transform 0.2s;
+}
+.faq-item[open] summary::after {
+  content: '-';
+}
+.faq-answer {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  padding: 0 0 10px;
+}
+
+/* =================== CREDITS =================== */
+.settings-credits {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.settings-credits a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.settings-credits a:hover {
+  text-decoration: underline;
+}
+
+/* =================== TEA MODAL =================== */
+.tea-modal {
+  padding: 28px 24px;
+}
+.tea-pay-btn {
+  display: inline-block;
+  background: var(--accent);
+  color: #000;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+.tea-pay-btn:hover {
+  opacity: 0.85;
+}
+
+/* =================== COMING SOON =================== */
+.modal-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+.coming-soon-heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.coming-soon-heading i {
+  font-size: 12px;
+}
+.coming-soon-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.modal-tag.coming-soon {
+  opacity: 0.4;
+  border-style: dashed;
+  cursor: default;
+  font-size: 11px;
+}
