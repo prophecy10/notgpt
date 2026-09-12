@@ -6,6 +6,8 @@ function tryCharCount(lower, original) {
     /(?:character|char|letter)\s+count\s+(?:of|for|in)\s+["\u201c\u201d'\u2018\u2019]?(.+?)["\u201c\u201d'\u2018\u2019]?\s*\??$/i,
     /(?:length|len)\s+(?:of|for)\s+["\u201c\u201d'\u2018\u2019]?(.+?)["\u201c\u201d'\u2018\u2019]?\s*\??$/i,
     /(?:how\s+(?:long|many\s+chars?)\s+is)\s+["\u201c\u201d'\u2018\u2019]?(.+?)["\u201c\u201d'\u2018\u2019]?\s*\??$/i,
+    /(?:character|char|letter)\s*count\s*[:\-\u2013\u2014]\s*(.+)\s*$/i,
+    /count\s+(?:the\s+)?(?:characters?|chars?|letters?)\s*[:\-\u2013\u2014]\s*(.+)\s*$/i,
   ];
   for (var i = 0; i < patterns.length; i++) {
     var match = original.match(patterns[i]);

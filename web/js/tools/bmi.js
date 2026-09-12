@@ -1,8 +1,11 @@
 // =================== TOOL: BMI CALCULATOR ===================
 
 function tryBMI(lower, original) {
-  // ---- Gate: must mention "bmi" ----
-  if (!/\bbmi\b/i.test(lower)) return null;
+  // ---- Gate: must mention "bmi" or "body mass index" ----
+  if (!/\bbmi\b|body\s*mass\s*index/i.test(lower)) return null;
+
+  // Normalize "body mass index" to "bmi" for downstream parsing
+  lower = lower.replace(/body\s*mass\s*index/gi, 'bmi');
 
   const text = original.trim();
 

@@ -8,7 +8,7 @@
 
 function tryLoremIpsum(lower, original) {
   // Must mention lorem, placeholder text, filler text, or dummy text
-  if (!/lorem\s*ipsum|placeholder\s*text|filler\s*text|dummy\s*text|lipsum/.test(lower)) return null;
+  if (!/lorem\s*ipsum|placeholder\s*text|filler\s*text|dummy\s*text|lipsum|dummy\s*text\s*generator|generate\s*(?:some\s+)?(?:filler|dummy|placeholder)\s*text|(?:need|want|give|get)\s+(?:some\s+)?(?:filler|dummy|placeholder)\s*text/.test(lower)) return null;
 
   // --- Classic lorem ipsum paragraphs ---
   var paragraphs = [

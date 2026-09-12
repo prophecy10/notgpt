@@ -455,7 +455,11 @@ function _step6_typos(s) {
       'your','about','would','could','should','there','their','where','other',
       'been','were','very','here','over','after','before','under','every',
       'times','plus','minus','divided','hello','help','world','like','open',
-      'need','want','show','know','look','work','long','last','first','next'];
+      'need','want','show','know','look','work','long','last','first','next',
+      'name','city','age','true','false','null','type','data','list','text',
+      'code','file','info','home','page','user','test','item','form','view',
+      'acre','acres','pint','pints','cups','tbsp','inch','yard','mile',
+      'gram','kilo','byte','watt','volt','knot','liter','litre','ounce'];
     if (_skipWords.indexOf(lower) !== -1) return word;
 
     // Skip if it is already a known word
