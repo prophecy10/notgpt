@@ -8,6 +8,10 @@ function tryArithmetic(lower, original) {
   const mathSignals = /(\d\s*[\+\-\*\/\^%×÷]\s*\d|plus|minus|times|divided|multiplied|mod(?:ulo)?|square\s*root|sqrt|power|raise|\bsum\b|\bproduct\b)/i;
   if (!mathSignals.test(lower)) return null;
 
+  // ---- Reject dates and other number shapes that only look like maths ----
+  // "2026-10-17", "10/10/2026", "17-10-2026" are dates, not subtractions or divisions.
+  if (/\b\d{4}[-\/.]\d{1,2}[-\/.]\d{1,2}\b|\b\d{1,2}[-\/.]\d{1,2}[-\/.]\d{2,4}\b/.test(lower)) return null;
+
   // ---- Reject if this looks like a date query (don't steal from date-diff) ----
   if (/\b(?:days?|between|from|until|since)\b/i.test(lower) && /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december|today|tomorrow|yesterday)\b/i.test(lower)) return null;
 
@@ -33,6 +37,15 @@ function tryArithmetic(lower, original) {
     if (n < 0) return _mathError('Cannot take the square root of a negative number.');
     const result = Math.sqrt(n);
     return _mathResult(`√${formatNum(n)}`, result);
+  }
+
+  // ---- Handle "3/4 of 120" (fraction of a number) ----
+  const fracOfMatch = expr.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\s+of\s+(\d+(?:,\d{3})*(?:\.\d+)?)\s*$/i);
+  if (fracOfMatch) {
+    const num = parseFloat(fracOfMatch[1]), den = parseFloat(fracOfMatch[2]);
+    const whole = parseFloat(fracOfMatch[3].replace(/,/g, ''));
+    if (den === 0) return _mathError('Division by zero');
+    return _mathResult(`${formatNum(num)}/${formatNum(den)} × ${formatNum(whole)}`, num / den * whole);
   }
 
   // ---- Handle "A to the power of B" / "A raised to B" ----
@@ -64,7 +77,13 @@ function tryArithmetic(lower, original) {
   // Strip commas inside numbers (e.g. 1,000)
   normalised = normalised.replace(/(\d),(\d{3})/g, '$1$2');
 
-  // Strip any remaining non-math characters (letters, etc.) but keep digits, ops, parens, dots, spaces
+  // Politeness is fine; any other leftover word means this isn't a pure expression
+  // (e.g. "phone number 98765-43210", "age 1990-05-15") — refuse rather than guess.
+  normalised = normalised.replace(/\b(?:please|pls|plz|thanks|thank\s+you|equals?|is)\b/gi, ' ').replace(/=/g, ' ');
+  const leftover = normalised.replace(/\d+(?:\.\d+)?e[+-]?\d+/gi, '');
+  if (/[a-z\u00C0-\uFFFF]/i.test(leftover.replace(/[×÷√]/g, ''))) return null;
+
+  // Strip any remaining non-math characters but keep digits, ops, parens, dots, spaces
   normalised = normalised.replace(/[^0-9+\-*/%^().e\s]/gi, '');
   normalised = normalised.trim();
 

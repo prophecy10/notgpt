@@ -84,3 +84,9 @@ That's it. Three files touched, one new file created.
 - Include 5+ example queries in your PR description
 - Test in Chrome, Firefox, and mobile
 - No breaking changes to existing tools
+
+## Testing
+
+Run `npm test` (or `node tests/run.js`) before opening a PR. It loads the real browser scripts in Node, freezes the clock at 2026-10-17, and checks that each sample input reaches the right tool with the right answer. CI runs it on every pull request.
+
+When you add or change a tool, add cases to `tests/run.js`, including at least one input that should **not** match. A wrong confident answer is worse than "I can't do that".

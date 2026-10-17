@@ -1,21 +1,29 @@
 {
   "name": "notgpt",
   "version": "1.0.0",
-  "description": "<div align=\"center\">",
-  "main": "index.js",
+  "description": "A ChatGPT-style chat box for simple tasks, answered with math instead of AI. Runs in the browser.",
+  "main": "web/index.html",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node tests/run.js",
+    "start": "npx serve web"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/prophecy10/notgpt.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "calculator",
+    "converter",
+    "no-ai",
+    "offline",
+    "pwa",
+    "utilities"
+  ],
+  "author": "prophecy10",
+  "license": "MIT",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/prophecy10/notgpt/issues"
