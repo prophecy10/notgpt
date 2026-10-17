@@ -6,6 +6,7 @@
 // Supports "$" prefix, "dollars", "bucks", naked numbers
 
 function tryDiscount(lower, original) {
+  var CUR = currencyOf(original);
   // Must mention discount/off/sale or percent-off pattern
   if (!/discount|%\s*off|\boff\b|sale\s*price/.test(lower)) return null;
 
@@ -69,13 +70,13 @@ function tryDiscount(lower, original) {
 
   var html =
     '<strong style="color:var(--accent)">🏷️ Discount Calculator</strong><br><br>' +
-    'Original price: <strong>$' + price.toFixed(2) + '</strong><br>' +
+    'Original price: <strong>' + money(price, CUR) + '</strong><br>' +
     'Discount: ' + discountPercent + '% off<br>' +
-    'You save: <strong style="color:var(--accent)">$' + savings.toFixed(2) + '</strong><br>' +
-    'Final price: <strong>$' + finalPrice.toFixed(2) + '</strong>';
+    'You save: <strong style="color:var(--accent)">' + money(savings, CUR) + '</strong><br>' +
+    'Final price: <strong>' + money(finalPrice, CUR) + '</strong>';
 
   html += '<br><br><span style="font-size:12px;color:var(--text-secondary)">' +
-    'Formula: $' + price.toFixed(2) + ' - (' + discountPercent + '% x $' + price.toFixed(2) + ') = $' + finalPrice.toFixed(2) +
+    'Formula: ' + money(price, CUR) + ' - (' + discountPercent + '% x ' + money(price, CUR) + ') = ' + money(finalPrice, CUR) +
     '</span>';
 
   // Cheeky commentary
