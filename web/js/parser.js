@@ -45,7 +45,7 @@ const welcomeMessages = [
   { title: "I once calculated 1 million percentages. No sweat.", sub: "Because I don't sweat. Or think. Or hallucinate. I'm a tool, and I'm proud of it. Try me." },
   { title: "Warning: May cause nostalgia for simpler times.", sub: "When you asked a computer a question and it just... answered. No 'as an AI language model' disclaimers. Just results." },
   { title: "The greenest query is the one that skips the data center.", sub: "For simple math and conversions, your browser is all you need. We run 100% client-side. Zero emissions." },
-  { title: "I don't learn from your data. I can't.", sub: "I literally have no backend. Your questions stay in your browser. Your privacy is safe because I'm too simple to violate it." },
+  { title: "I don't learn from your data.", sub: "Your questions stay in your browser. The only exception is opt-in: if you choose to share failed queries in Settings, those (and only those) are sent so new tools can be added." },
   { title: "Built different. Actually.", sub: "No neural networks, no embeddings, no attention mechanisms. Just regex, formulas, and a healthy respect for simplicity." },
   { title: "Need poetry? Go to ChatGPT. Need 18% of 4500? Stay here.", sub: "We know our lane. And our lane is math, conversions, and random numbers. We're really good in this lane." },
   { title: "Think of me as the opening act.", sub: "I handle the quick stuff - calculations, conversions, formatting. For the deep stuff, the headliner (ChatGPT) is just a click away." },
