@@ -7,6 +7,7 @@
 // Supports "$" prefix, naked numbers, "dollars", "bucks"
 
 function tryTipCalculator(lower, original) {
+  var CUR = currencyOf(original);
   // Quick bail: must mention tip, or "split bill"
   if (!/tip|split\s*bill/.test(lower)) return null;
 
@@ -95,19 +96,19 @@ function tryTipCalculator(lower, original) {
 
   var html =
     '<strong style="color:var(--accent)">💰 Tip Calculator</strong><br><br>' +
-    'Bill: <strong>$' + billAmount.toFixed(2) + '</strong><br>' +
-    'Tip (' + tipPercent + '%): <strong style="color:var(--accent)">$' + tipAmount.toFixed(2) + '</strong><br>' +
-    'Total: <strong>$' + total.toFixed(2) + '</strong>';
+    'Bill: <strong>' + money(billAmount, CUR) + '</strong><br>' +
+    'Tip (' + tipPercent + '%): <strong style="color:var(--accent)">' + money(tipAmount, CUR) + '</strong><br>' +
+    'Total: <strong>' + money(total, CUR) + '</strong>';
 
   if (splitCount && splitCount > 1) {
     var perPerson = total / splitCount;
     html += '<br><br>' +
-      'Split ' + splitCount + ' ways: <strong style="color:var(--accent)">$' + perPerson.toFixed(2) + ' per person</strong>';
+      'Split ' + splitCount + ' ways: <strong style="color:var(--accent)">' + money(perPerson, CUR) + ' per person</strong>';
   }
 
   html += '<br><br><span style="font-size:12px;color:var(--text-secondary)">' +
-    'Formula: $' + billAmount.toFixed(2) + ' x ' + tipPercent + '% = $' + tipAmount.toFixed(2) +
-    (splitCount && splitCount > 1 ? ' | $' + total.toFixed(2) + ' / ' + splitCount + ' = $' + (total / splitCount).toFixed(2) : '') +
+    'Formula: ' + money(billAmount, CUR) + ' x ' + tipPercent + '% = ' + money(tipAmount, CUR) +
+    (splitCount && splitCount > 1 ? ' | ' + money(total, CUR) + ' / ' + splitCount + ' = ' + money((total / splitCount), CUR) : '') +
     '</span>';
 
   return { type: 'tip-calculator', html: html };

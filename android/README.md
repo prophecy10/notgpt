@@ -1,6 +1,8 @@
 # NotGPT Android App
 
-🚧 **Coming Soon**
+🚧 **Native wrapper: coming soon. Installable app: available now.**
+
+NotGPT is already an installable, offline-capable web app. On Android, open the site in Chrome → menu → **Install app** (or **Add to Home screen**). On iPhone, Safari → Share → **Add to Home Screen**.
 
 The Android app will be a lightweight WebView wrapper that loads the NotGPT web app.
 
@@ -18,6 +20,6 @@ All tools, UI, and logic live in `web/`. The Android folder only contains:
 - App icons and splash screen
 - AndroidManifest.xml
 
-## Alternative: PWA
+## Play Store later
 
-Before the native app, NotGPT can be installed as a Progressive Web App (PWA) directly from Chrome on Android. Just visit the website → "Add to Home Screen".
+The simplest route to the Play Store is a Trusted Web Activity (for example with Bubblewrap), which packages this same PWA with no duplicated code.

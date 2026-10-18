@@ -90,13 +90,90 @@ function tryDateDifference(lower, original) {
       let breakdown = '';
       if (yearsDiff > 0) breakdown = `≈ ${yearsDiff} year${yearsDiff>1?'s':''}, ${monthsDiff} month${monthsDiff!==1?'s':''}, ${remainDays} day${remainDays!==1?'s':''}`;
       else if (weeks > 0) breakdown = `That's about ${weeks} week${weeks>1?'s':''} and ${remDays} day${remDays!==1?'s':''}`;
-      const html = `📅 There are <strong style="color:var(--accent)">${diffDays.toLocaleString()} days</strong> between <strong>${s1}</strong> and <strong>${s2}</strong>` +
+      const html = `📅 There ${diffDays===1?'is':'are'} <strong style="color:var(--accent)">${diffDays.toLocaleString()} day${diffDays===1?'':'s'}</strong> between <strong>${s1}</strong> and <strong>${s2}</strong>` +
         (breakdown ? `<br><br><span style="font-size:12px;color:var(--text-secondary)">${breakdown}</span>` : '');
       return { type: 'date', html };
     }
   }
 
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const fmt = d => MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+  const dayMs = 1000 * 60 * 60 * 24;
+  const clean = s => s.replace(/[?.!]+$/, '').replace(/^(?:on|the)\s+/i, '').trim();
+
+  // "age if born 1990-05-15", "how old am I, born 15 May 1990", "age 1990-05-15", "my age born on 15/05/1990"
+  const ageMatch = lower.match(/(?:\bage\b|how\s+old|\bborn\b|birth\s*date|dob|date\s+of\s+birth)[^0-9a-z]*(?:(?:am\s+i|is\s+(?:he|she|someone)|if|i\s+was|was|on|in|my|born|birth\s*date|dob|date\s+of\s+birth)\s+)*(?:(?:born|on)\s+)?(.+)$/);
+  if (ageMatch) {
+    const birth = parseDateFuzzy(clean(ageMatch[1]));
+    if (birth) {
+      if (birth > today) return { type: 'date', html: `📅 <strong>${fmt(birth)}</strong> is in the future, so there's no age to calculate yet.` };
+      let y = today.getFullYear() - birth.getFullYear();
+      let m = today.getMonth() - birth.getMonth();
+      let d = today.getDate() - birth.getDate();
+      if (d < 0) { m--; d += new Date(today.getFullYear(), today.getMonth(), 0).getDate(); }
+      if (m < 0) { y--; m += 12; }
+      const totalDays = Math.round((today - birth) / dayMs);
+      let next = new Date(today.getFullYear(), birth.getMonth(), birth.getDate());
+      if (next < today) next = new Date(today.getFullYear() + 1, birth.getMonth(), birth.getDate());
+      const toNext = Math.round((next - today) / dayMs);
+      const html = `🎂 <strong style="color:var(--accent)">${y} years, ${m} month${m!==1?'s':''}, ${d} day${d!==1?'s':''}</strong>` +
+        `<br><span style="font-size:12px;color:var(--text-secondary)">Born ${fmt(birth)} (${DAYS[birth.getDay()]}) · ${totalDays.toLocaleString()} days old</span>` +
+        `<br><br><span style="font-size:12px;color:var(--text-secondary)">${toNext === 0 ? 'Happy birthday! 🎉' : `Next birthday in ${toNext} day${toNext!==1?'s':''}`}</span>`;
+      return { type: 'date', html };
+    }
+  }
+
+  // "how many days since 2020-03-24", "days since jan 1 2026", "days ago was 1 jan 2026"
+  const sinceMatch = lower.match(/(?:(?:how\s+many|no\.?\s*(?:of)?|number\s+of)\s+)?days?\s*(?:since|after|have\s+passed\s+since|from)\s+(.+)$/);
+  if (sinceMatch) {
+    const from = parseDateFuzzy(clean(sinceMatch[1]));
+    if (from && from <= today) {
+      const diffDays = Math.round((today - from) / dayMs);
+      const weeks = Math.floor(diffDays / 7), rem = diffDays % 7;
+      const html = `📅 <strong style="color:var(--accent)">${diffDays.toLocaleString()} days</strong> since <strong>${fmt(from)}</strong>` +
+        `<br><br><span style="font-size:12px;color:var(--text-secondary)">That's about ${weeks.toLocaleString()} week${weeks!==1?'s':''} and ${rem} day${rem!==1?'s':''}</span>`;
+      return { type: 'date', html };
+    }
+  }
+
+  // A bare date ("2026-10-17", "17/10/2026", "what day is 25 dec 2026") → weekday + distance from today
+  const bare = lower.replace(/^(?:what\s+(?:day|weekday)\s+(?:is|was|will\s+be|of\s+the\s+week\s+is)|which\s+day\s+is|day\s+of)\s+/, '');
+  const bareDate = parseDateFuzzy(clean(bare));
+  if (bareDate) {
+    const diff = Math.round((bareDate - today) / dayMs);
+    const rel = diff === 0 ? 'Today' : diff > 0 ? `${diff.toLocaleString()} day${diff!==1?'s':''} from today` : `${(-diff).toLocaleString()} day${diff!==-1?'s':''} ago`;
+    const html = `📅 <strong style="color:var(--accent)">${DAYS[bareDate.getDay()]}</strong>, ${fmt(bareDate)}` +
+      `<br><br><span style="font-size:12px;color:var(--text-secondary)">${rel}</span>`;
+    return { type: 'date', html };
+  }
+
   return null;
+}
+
+// Does this browser's locale write the day before the month (22/11/2026, as in India and the UK)?
+// Used only when a numeric date is ambiguous (both parts ≤ 12).
+function _dayFirstLocale() {
+  try {
+    const lang = (typeof navigator !== 'undefined' && navigator.language) || undefined;
+    const parts = new Intl.DateTimeFormat(lang).formatToParts(new Date(2000, 10, 22));
+    const order = parts.filter(p => p.type === 'day' || p.type === 'month').map(p => p.type);
+    return order[0] === 'day';
+  } catch (e) { return false; }
+}
+
+// Builds a date only if it really exists (no silent roll-over: 31/02 is not 3 March)
+function _ymd(y, m, d) {
+  const dt = new Date(y, m - 1, d);
+  return (dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d) ? dt : null;
+}
+
+function _dmy(a, b, y) {
+  // a/b are the first two numbers of a numeric date
+  if (a > 12 && b <= 12) return _ymd(y, b, a);               // must be DD/MM
+  if (b > 12 && a <= 12) return _ymd(y, a, b);               // must be MM/DD
+  if (a > 12 || b > 12) return null;                         // 13/13 — not a date
+  return _dayFirstLocale() ? _ymd(y, b, a) : _ymd(y, a, b);
 }
 
 function parseDateFuzzy(str) {
@@ -140,24 +217,16 @@ function parseDateFuzzy(str) {
   }
 
   // "2025-01-01" or "01/01/2025" or "1/1/2025"
-  m = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  if (m) return new Date(parseInt(m[1]), parseInt(m[2]) - 1, parseInt(m[3]));
+  m = str.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/);
+  if (m) return _ymd(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]));
 
-  m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (m) return new Date(parseInt(m[3]), parseInt(m[1]) - 1, parseInt(m[2]));
+  m = str.match(/^(\d{1,2})[\/.](\d{1,2})[\/.](\d{4})$/);
+  if (m) return _dmy(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]));
 
   // "22/11/1992" (DD/MM/YYYY - assume DD/MM for international format when day > 12)
   // Already handled above as MM/DD — but add DD-MM-YYYY with dashes
   m = str.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
-  if (m) {
-    var a = parseInt(m[1]), b = parseInt(m[2]), y = parseInt(m[3]);
-    // If first number > 12, it must be day (DD-MM-YYYY)
-    if (a > 12) return new Date(y, b - 1, a);
-    // If second number > 12, it must be day (MM-DD-YYYY)
-    if (b > 12) return new Date(y, a - 1, b);
-    // Ambiguous (both <= 12) — assume MM-DD-YYYY (US convention)
-    return new Date(y, a - 1, b);
-  }
+  if (m) return _dmy(parseInt(m[1]), parseInt(m[2]), parseInt(m[3]));
 
   return null;
 }

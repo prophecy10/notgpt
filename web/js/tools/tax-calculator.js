@@ -7,6 +7,7 @@
 // Recognizes: tax, GST, VAT, sales tax
 
 function tryTaxCalculator(lower, original) {
+  var CUR = currencyOf(original) || (/\bgst\b/i.test(lower) ? '₹' : '');
   // Must mention tax, GST, or VAT
   if (!/\btax\b|\bgst\b|\bvat\b/.test(lower)) return null;
 
@@ -80,13 +81,13 @@ function tryTaxCalculator(lower, original) {
     var taxAmount = amount - preTax;
 
     html +=
-      'Total (tax-inclusive): <strong>$' + amount.toFixed(2) + '</strong><br>' +
+      'Total (tax-inclusive): <strong>' + money(amount, CUR) + '</strong><br>' +
       taxLabel + ' rate: ' + taxPercent + '%<br>' +
-      taxLabel + ' amount: <strong style="color:var(--accent)">$' + taxAmount.toFixed(2) + '</strong><br>' +
-      'Price before ' + taxLabel.toLowerCase() + ': <strong>$' + preTax.toFixed(2) + '</strong>';
+      taxLabel + ' amount: <strong style="color:var(--accent)">' + money(taxAmount, CUR) + '</strong><br>' +
+      'Price before ' + taxLabel.toLowerCase() + ': <strong>' + money(preTax, CUR) + '</strong>';
 
     html += '<br><br><span style="font-size:12px;color:var(--text-secondary)">' +
-      'Formula: $' + amount.toFixed(2) + ' / (1 + ' + taxPercent + '%) = $' + preTax.toFixed(2) +
+      'Formula: ' + money(amount, CUR) + ' / (1 + ' + taxPercent + '%) = ' + money(preTax, CUR) +
       '</span>';
   } else {
     // Forward: add tax to amount
@@ -94,13 +95,13 @@ function tryTaxCalculator(lower, original) {
     var total = amount + taxAmount2;
 
     html +=
-      'Price: <strong>$' + amount.toFixed(2) + '</strong><br>' +
+      'Price: <strong>' + money(amount, CUR) + '</strong><br>' +
       taxLabel + ' rate: ' + taxPercent + '%<br>' +
-      taxLabel + ' amount: <strong style="color:var(--accent)">$' + taxAmount2.toFixed(2) + '</strong><br>' +
-      'Total with ' + taxLabel.toLowerCase() + ': <strong>$' + total.toFixed(2) + '</strong>';
+      taxLabel + ' amount: <strong style="color:var(--accent)">' + money(taxAmount2, CUR) + '</strong><br>' +
+      'Total with ' + taxLabel.toLowerCase() + ': <strong>' + money(total, CUR) + '</strong>';
 
     html += '<br><br><span style="font-size:12px;color:var(--text-secondary)">' +
-      'Formula: $' + amount.toFixed(2) + ' + (' + taxPercent + '% x $' + amount.toFixed(2) + ') = $' + total.toFixed(2) +
+      'Formula: ' + money(amount, CUR) + ' + (' + taxPercent + '% x ' + money(amount, CUR) + ') = ' + money(total, CUR) +
       '</span>';
   }
 

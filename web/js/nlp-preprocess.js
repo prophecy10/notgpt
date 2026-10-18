@@ -338,7 +338,7 @@ var _hardcodedTypos = {
   'centimter': 'centimeter', 'centimetre': 'centimeter',
   'milimeter': 'millimeter', 'milimetre': 'millimeter', 'millimetre': 'millimeter',
   'genrate': 'generate', 'generae': 'generate', 'generat': 'generate',
-  'pasword': 'password', 'passwrd': 'password', 'passowrd': 'password',
+  'pasword': 'password', 'passwrd': 'password', 'passowrd': 'password', 'paswrd': 'password', 'pssword': 'password',
   'discont': 'discount', 'dicount': 'discount', 'discout': 'discount',
   'diffrence': 'difference', 'diferrence': 'difference', 'differece': 'difference',
   'foramt': 'format', 'fromats': 'formats', 'fromat': 'format',
@@ -371,7 +371,7 @@ var _hardcodedTypos = {
 var _shortTypos = {
   'hw': 'how', 'mch': 'much', 'wht': 'what', 'wat': 'what',
   'ot': 'of', 'fo': 'of', 'te': 'the', 'teh': 'the',
-  'fro': 'from', 'tme': 'time', 'dte': 'date', 'hwo': 'how'
+  'fro': 'from', 'tme': 'time', 'dte': 'date', 'hwo': 'how', 'mny': 'many', 'hw mny': 'how many'
 };
 // Dictionary of valid keywords for Levenshtein matching
 var _knownWords = [
@@ -431,9 +431,14 @@ function _levenshtein(a, b) {
 }
 
 function _findClosestWord(word) {
+  // Only fix near-misses of keywords. Real typos keep the first letter, and short words
+  // get one edit at most — otherwise real words get rewritten
+  // ("letter"→"meter", "since"→"inch", "born"→"more").
   var best = null;
-  var bestDist = 3; // threshold: max distance 2
+  var maxDist = word.length >= 8 ? 2 : 1;
+  var bestDist = maxDist + 1;
   for (var k = 0; k < _knownWords.length; k++) {
+    if (_knownWords[k][0] !== word[0]) continue;
     var d = _levenshtein(word, _knownWords[k]);
     if (d < bestDist) {
       bestDist = d;
@@ -459,7 +464,9 @@ function _step6_typos(s) {
       'name','city','age','true','false','null','type','data','list','text',
       'code','file','info','home','page','user','test','item','form','view',
       'acre','acres','pint','pints','cups','tbsp','inch','yard','mile',
-      'gram','kilo','byte','watt','volt','knot','liter','litre','ounce'];
+      'gram','kilo','byte','watt','volt','knot','liter','litre','ounce',
+      'letter','letters','since','born','birth','appear','appears','occur','word','words',
+      'week','weekday','ago','old','until','till','left','says','said','call','called'];
     if (_skipWords.indexOf(lower) !== -1) return word;
 
     // Skip if it is already a known word

@@ -498,8 +498,12 @@ function sendFeedback(message) {
 }
 
 // =================== AUTO-CLEANUP ===================
+// Asks the sheet to drop entries older than 7 days. Sent only by people who opted in to sharing,
+// so nobody else's browser contacts the endpoint. (Best: also run the scheduled cleanup in
+// docs/apps-script.gs, so deletion doesn't depend on visits.)
 function cleanupOldFailedChats() {
   try {
+    if (!loadSettings().shareFailedChats) return;
     fetch(SHEETS_URL, {
       method: 'POST',
       body: JSON.stringify({

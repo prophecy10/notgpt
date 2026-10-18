@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NotGPT - Not everything needs AI</title>
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<meta name="description" content="NotGPT: calculators, unit converters, date and text tools in a chat box. Deterministic answers with math, not AI. Runs in your browser, works offline.">
+<meta name="theme-color" content="#1a1a1a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<meta property="og:title" content="NotGPT — Not everything needs AI">
+<meta property="og:description" content="Percentages, conversions, dates, letter counts. Answered with math, not AI. Nothing leaves your browser.">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="css/style.css">
 
@@ -118,7 +124,7 @@
   <div class="modal" onclick="event.stopPropagation()">
     <button class="modal-close" onclick="closeModalDirect()">&times;</button>
     <h2>What can I do?</h2>
-    <p class="modal-sub">Simple tools that run on math, not AI. Everything below works right in your browser - no servers, no AI, no data leaving your device.</p>
+    <p class="modal-sub">Simple tools that run on math, not AI. Everything below works right in your browser - no servers, no AI, and nothing leaves your device unless you opt in to sharing failed queries.</p>
     <div class="modal-category"><h3><i class="fa-solid fa-calculator"></i> Calculators</h3><div class="modal-category-items"><span class="modal-tag">Percentage</span><span class="modal-tag">Arithmetic</span><span class="modal-tag">Tip calculator</span><span class="modal-tag">Discount</span><span class="modal-tag">Tax / GST / VAT</span><span class="modal-tag">Random numbers</span></div></div>
     <div class="modal-category"><h3><i class="fa-solid fa-calendar-days"></i> Date & Time</h3><div class="modal-category-items"><span class="modal-tag">Date difference</span></div></div>
     <div class="modal-category"><h3><i class="fa-solid fa-arrows-rotate"></i> Unit Conversion</h3><div class="modal-category-items"><span class="modal-tag">Length</span><span class="modal-tag">Weight</span><span class="modal-tag">Temperature</span><span class="modal-tag">Area</span><span class="modal-tag">Volume</span><span class="modal-tag">Speed</span><span class="modal-tag">Data / Storage</span><span class="modal-tag">Cooking</span><span class="modal-tag">Time</span></div></div>
@@ -280,6 +286,7 @@
 <script src="js/nlp-preprocess.js"></script>
 
 <!-- New Tools -->
+<script src="js/tools/money.js"></script>
 <script src="js/tools/tip-calculator.js"></script>
 <script src="js/tools/discount.js"></script>
 <script src="js/tools/tax-calculator.js"></script>
@@ -306,6 +313,11 @@
 function openTeaModal() { document.getElementById('teaOverlay').classList.add('active'); }
 function closeTeaModal(e) { if (e.target === document.getElementById('teaOverlay')) closeTeaModalDirect(); }
 function closeTeaModalDirect() { document.getElementById('teaOverlay').classList.remove('active'); }
+
+// Offline support (installable app)
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', function() { navigator.serviceWorker.register('sw.js').catch(function() {}); });
+}
 
 // Esc key closes any open modal/overlay
 document.addEventListener('keydown', function(e) {
